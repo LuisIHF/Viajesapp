@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ViajesApp · Sistema de Boletaje</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#0b1220; --panel:#111a2c; --panel2:#16223a; --border:#233150;
+  --text:#eaf0fb; --muted:#8ea0c4; --brand:#2f8fff; --brand2:#22d3c5;
+  --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+  --radius:12px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0b1220,#0c1526 40%,#0b1220);color:var(--text);min-height:100vh}
+a{color:var(--brand)}
+.hidden{display:none !important}
+button{cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit}
+
+/* ---------- Login ---------- */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.loginCard{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:32px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.loginCard h1{font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.loginCard .logoDot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+.loginCard p.sub{color:var(--muted);margin:0 0 24px;font-size:13px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+.field input, .field select, .field textarea{width:100%;padding:10px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px}
+.field input:focus, .field select:focus, .field textarea:focus{outline:none;border-color:var(--brand)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:8px;border:1px solid transparent;font-size:14px;font-weight:600;transition:.15s}
+.btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#04101f;width:100%}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-outline{background:transparent;border-color:var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--brand)}
+.btn-danger{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.4);color:#fca5a5}
+.btn-ok{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#86efac}
+.btn-sm{padding:6px 10px;font-size:12px}
+.errorMsg{color:#fca5a5;font-size:13px;margin-top:10px;min-height:16px}
+.hintMsg{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.5}
+
+/* ---------- App shell ---------- */
+#appShell{display:none;min-height:100vh}
+#appShell.active{display:flex}
+.sidebar{width:230px;background:var(--panel);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;gap:4px}
+.brand{display:flex;align-items:center;gap:10px;padding:8px 10px 20px;font-weight:700;font-size:16px}
+.brand .logoDot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+.navBtn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--muted);background:transparent;border:none;text-align:left;font-size:14px;font-weight:500}
+.navBtn:hover{background:var(--panel2);color:var(--text)}
+.navBtn.active{background:rgba(47,143,255,.15);color:var(--brand)}
+.sidebar .spacer{flex:1}
+.userBox{border-top:1px solid var(--border);padding-top:14px;font-size:12px;color:var(--muted)}
+.userBox .who{color:var(--text);font-weight:600;font-size:13px;margin-bottom:2px}
+.roleTag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-top:6px}
+.roleTag.admin{background:rgba(47,143,255,.15);color:#7db8ff}
+.roleTag.vendedor{background:rgba(34,211,197,.15);color:#5eead4}
+.roleTag.chofer{background:rgba(245,158,11,.15);color:#fcd34d}
+
+.mainArea{flex:1;padding:24px 28px;max-width:1200px;overflow-x:hidden}
+.pageTitle{font-size:20px;font-weight:700;margin:0 0 4px}
+.pageSub{color:var(--muted);font-size:13px;margin:0 0 22px}
+.view{display:none}
+.view.active{display:block}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:900px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.statCard .label{color:var(--muted);font-size:12px;margin-bottom:6px}
+.statCard .value{font-size:26px;font-weight:700}
+.statCard .value.brand{color:var(--brand2)}
+
+.sectionCard{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:18px}
+.sectionCard h3{margin:0 0 14px;font-size:15px;display:flex;align-items:center;justify-content:space-between}
+.sectionCard h3 .sub{font-weight:400;color:var(--muted);font-size:12px}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+.tableWrap{overflow-x:auto}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge.paid{background:rgba(34,197,94,.15);color:#86efac}
+.badge.pending{background:rgba(245,158,11,.15);color:#fcd34d}
+.badge.cancelled{background:rgba(239,68,68,.15);color:#fca5a5}
+
+.formRow{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.formRow .field{flex:1;min-width:140px;margin-bottom:0}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.toolbar .field{margin-bottom:0;min-width:150px}
+.tag{font-size:11px;color:var(--muted)}
+
+.modalBg{position:fixed;inset:0;background:rgba(3,7,18,.7);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modalBg.active{display:flex}
+.modalCard{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto}
+.modalCard h3{margin-top:0}
+.modalActions{display:flex;gap:10px;justify-content:end;margin-top:18px}
+
+/* ticket */
+.ticket{background:#fff;color:#111;border-radius:10px;padding:22px;max-width:380px;margin:0 auto;font-family:monospace}
+.ticket h2{margin:0 0 2px;font-size:16px}
+.ticket .folio{font-size:13px;color:#555;margin-bottom:12px}
+.ticket table{font-size:12px}
+.ticket td{border:none;padding:4px 0}
+.ticket hr{border:none;border-top:1px dashed #999;margin:12px 0}
+.ticket .qrWrap{text-align:center;margin-top:14px}
+.printOnly{display:none}
+@media print{
+  body *{visibility:hidden}
+  .ticket, .ticket *{visibility:visible}
+  .ticket{position:absolute;left:0;top:0}
+}
+
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.iconBtn{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 10px;font-size:13px}
+.seatBar{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden;margin-top:6px}
+.seatBar div{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+.mobileTopbar{display:none}
+@media(max-width:800px){
+  #appShell.active{flex-direction:column}
+  .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:10px;border-right:none;border-bottom:1px solid var(--border)}
+  .sidebar .brand,.sidebar .userBox,.sidebar .spacer{display:none}
+  .navBtn{white-space:nowrap}
+  .mainArea{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginScreen">
+  <div class="loginCard">
+    <h1><span class="logoDot"></span> ViajesApp</h1>
+    <p class="sub">Sistema de boletaje y control de rutas</p>
+    <div class="field">
+      <label>Correo electrónico</label>
+      <input type="email" id="loginEmail" placeholder="usuario@viajesapp.mx" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Ingresar</button>
+    <div class="errorMsg" id="loginError"></div>
+    <div class="hintMsg">Acceso inicial de administrador:<br><b>admin@viajesapp.mx</b> / <b>Viajes2026Admin!</b><br>Se recomienda cambiar la contraseña después del primer ingreso.</div>
+  </div>
+</div>
+
+<!-- ===================== APP SHELL ===================== -->
+<div id="appShell">
+  <div class="sidebar">
+    <div class="brand"><span class="logoDot"></span> ViajesApp</div>
+    <div id="navButtons"></div>
+    <div class="spacer"></div>
+    <div class="userBox">
+      <div class="who" id="userName">—</div>
+      <div id="userEmail">—</div>
+      <span class="roleTag" id="userRoleTag">—</span>
+      <div style="margin-top:12px"><button class="btn btn-outline btn-sm" style="width:100%" onclick="doLogout()">Cerrar sesión</button></div>
+    </div>
+  </div>
+
+  <div class="mainArea">
+
+    <!-- ============ ADMIN: DASHBOARD ============ -->
+    <div class="view" id="view-dashboard">
+      <div class="pageTitle">Panel general</div>
+      <div class="pageSub">Resumen de operación de hoy</div>
+      <div class="grid grid-4" style="margin-bottom:22px">
+        <div class="card statCard"><div class="label">Ventas hoy</div><div class="value" id="stat-ventasHoy">—</div></div>
+        <div class="card statCard"><div class="label">Ingresos hoy</div><div class="value brand" id="stat-ingresosHoy">—</div></div>
+        <div class="card statCard"><div class="label">Asientos ocupados hoy</div><div class="value" id="stat-asientosHoy">—</div></div>
+        <div class="card statCard"><div class="label">Salidas programadas hoy</div><div class="value" id="stat-salidasHoy">—</div></div>
+      </div>
+      <div class="sectionCard">
+        <h3>Salidas de hoy <span class="sub" id="dashRefresh">actualizado ahora</span></h3>
+        <div class="tableWrap"><table id="tblSalidasHoy"><thead><tr><th>Ruta</th><th>Hora</th><th>Ocupación</th><th>Precio</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ============ ADMIN: RUTAS Y PRECIOS ============ -->
+    <div class="view" id="view-rutas">
+      <div class="pageTitle">Rutas, horarios y precios</div>
+      <div class="pageSub">Configura horarios recurrentes por ruta y genera las salidas del calendario</div>
+      <div class="sectionCard">
+        <h3>Generar salidas <span class="sub">crea las fechas concretas a partir de los horarios activos</span></h3>
+        <div class="formRow">
+          <div class="field" style="max-width:160px"><label>Días hacia adelante</label><input type="number" id="genDays" value="21" min="1" max="90"></div>
+          <button class="btn btn-primary" style="max-width:220px" onclick="generarSalidas()">Generar salidas</button>
+        </div>
+      </div>
+      <div id="rutasContainer"></div>
+    </div>
+
+    <!-- ============ ADMIN: NEGOCIO ============ -->
+    <div class="view" id="view-negocio">
+      <div class="pageTitle">Datos del negocio</div>
+      <div class="pageSub">Esta información aparece en los tickets digitales</div>
+      <div class="sectionCard" style="max-width:480px">
+        <div class="field"><label>Nombre del negocio</label><input id="bizName"></div>
+        <div class="field"><label>Teléfono</label><input id="bizPhone"></div>
+        <div class="field"><label>Dirección</label><input id="bizAddress"></div>
+        <div class="field"><label>Correo</label><input id="bizEmail"></div>
+        <div class="field"><label>URL del logo (opcional)</label><input id="bizLogo" placeholder="https://..."></div>
+        <button class="btn btn-primary" onclick="guardarNegocio()">Guardar cambios</button>
+        <div class="errorMsg" id="bizMsg"></div>
+      </div>
+    </div>
+
+    <!-- ============ ADMIN: USUARIOS ============ -->
+    <div class="view" id="view-usuarios">
+      <div class="pageTitle">Usuarios del sistema</div>
+      <div class="pageSub">Administradores, vendedores y choferes</div>
+      <div class="toolbar"><button class="btn btn-primary" onclick="openUserModal()">+ Nuevo usuario</button></div>
+      <div class="sectionCard">
+        <div class="tableWrap"><table id="tblUsuarios"><thead><tr><th>Nombre</th><th>Rol</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ============ ADMIN: REPORTES ============ -->
+    <div class="view" id="view-reportes">
+      <div class="pageTitle">Reportes y búsqueda</div>
+      <div class="pageSub">Busca por folio, fecha, ruta o cliente y exporta a CSV</div>
+      <div class="sectionCard">
+        <div class="toolbar">
+          <div class="field"><label>Folio</label><input id="rFolio" placeholder="VIA-260812-0001"></div>
+          <div class="field"><label>Desde</label><input type="date" id="rDesde"></div>
+          <div class="field"><label>Hasta</label><input type="date" id="rHasta"></div>
+          <div class="field"><label>Cliente / teléfono</label><input id="rCliente"></div>
+          <button class="btn btn-outline" onclick="buscarReportes()">Buscar</button>
+          <button class="btn btn-primary" onclick="exportarCSV()">Exportar CSV</button>
+        </div>
+        <div class="tableWrap"><table id="tblReportes"><thead><tr><th>Folio</th><th>Tipo</th><th>Ruta/Destino</th><th>Fecha</th><th>Cliente</th><th>Precio</th><th>Estado</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ============ VENDEDOR: NUEVA VENTA ============ -->
+    <div class="view" id="view-venta">
+      <div class="pageTitle">Nueva venta</div>
+      <div class="pageSub">Aparta o vende un lugar en una ruta fija</div>
+      <div class="sectionCard">
+        <div class="formRow">
+          <div class="field"><label>Ruta</label><select id="ventaRuta" onchange="cargarSalidasParaVenta()"></select></div>
+          <div class="field"><label>Fecha</label><input type="date" id="ventaFecha" onchange="cargarSalidasParaVenta()"></div>
+          <div class="field"><label>Salida</label><select id="ventaSalida"></select></div>
+        </div>
+        <div id="ventaSeatInfo" class="tag" style="margin:10px 0"></div>
+        <hr style="border-color:var(--border);margin:16px 0">
+        <div class="formRow">
+          <div class="field"><label>Nombre del pasajero</label><input id="ventaNombre"></div>
+          <div class="field"><label>Teléfono</label><input id="ventaTelefono"></div>
+        </div>
+        <div class="formRow" style="margin-top:10px">
+          <div class="field"><label>Correo (opcional)</label><input id="ventaCorreo"></div>
+          <div class="field"><label>Lugar de abordaje</label><input id="ventaAbordaje"></div>
+          <div class="field"><label>Precio</label><input type="number" id="ventaPrecio" step="0.01"></div>
+        </div>
+        <div class="formRow" style="margin-top:16px">
+          <button class="btn btn-outline" onclick="crearApartado()">Apartar (pendiente de pago)</button>
+          <button class="btn btn-primary" onclick="crearVentaPagada()">Vender y cobrar</button>
+        </div>
+        <div class="errorMsg" id="ventaMsg"></div>
+      </div>
+    </div>
+
+    <!-- ============ VENDEDOR: VIAJES ESPECIALES ============ -->
+    <div class="view" id="view-especiales">
+      <div class="pageTitle">Viajes especiales</div>
+      <div class="pageSub">Rutas no programadas con precio y horario personalizado</div>
+      <div class="sectionCard">
+        <div class="formRow">
+          <div class="field"><label>Origen</label><input id="espOrigen"></div>
+          <div class="field"><label>Destino</label><input id="espDestino"></div>
+        </div>
+        <div class="formRow" style="margin-top:10px">
+          <div class="field"><label>Fecha</label><input type="date" id="espFecha"></div>
+          <div class="field"><label>Hora</label><input type="time" id="espHora"></div>
+          <div class="field"><label>Precio</label><input type="number" id="espPrecio" step="0.01"></div>
+        </div>
+        <div class="formRow" style="margin-top:10px">
+          <div class="field"><label>Cliente</label><input id="espCliente"></div>
+          <div class="field"><label>Teléfono</label><input id="espTelefono"></div>
+          <div class="field"><label>Correo (opcional)</label><input id="espCorreo"></div>
+        </div>
+        <div class="formRow" style="margin-top:16px">
+          <button class="btn btn-outline" onclick="crearEspecial(false)">Apartar</button>
+          <button class="btn btn-primary" onclick="crearEspecial(true)">Vender y cobrar</button>
+        </div>
+        <div class="errorMsg" id="espMsg"></div>
+      </div>
+      <div class="sectionCard">
+        <h3>Viajes especiales recientes</h3>
+        <div class="tableWrap"><table id="tblEspeciales"><thead><tr><th>Folio</th><th>Ruta</th><th>Fecha</th><th>Cliente</th><th>Estado</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ============ VENDEDOR: AGENDA ============ -->
+    <div class="view" id="view-agenda">
+      <div class="pageTitle">Agenda de viajes</div>
+      <div class="pageSub">Disponibilidad de las próximas salidas</div>
+      <div class="toolbar"><div class="field"><label>Desde</label><input type="date" id="agendaDesde" onchange="cargarAgenda()"></div></div>
+      <div class="sectionCard"><div class="tableWrap"><table id="tblAgenda"><thead><tr><th>Ruta</th><th>Fecha</th><th>Hora</th><th>Ocupación</th><th>Precio</th></tr></thead><tbody></tbody></table></div></div>
+    </div>
+
+    <!-- ============ VENDEDOR/ADMIN: BUSCAR / COBRAR ============ -->
+    <div class="view" id="view-buscar">
+      <div class="pageTitle">Buscar reservas</div>
+      <div class="pageSub">Confirma pagos y genera tickets digitales</div>
+      <div class="sectionCard">
+        <div class="toolbar">
+          <div class="field"><label>Folio, nombre o teléfono</label><input id="buscarQ" placeholder="Buscar..."></div>
+          <button class="btn btn-primary" onclick="buscarReservas()">Buscar</button>
+        </div>
+        <div class="tableWrap"><table id="tblBuscar"><thead><tr><th>Folio</th><th>Tipo</th><th>Pasajero</th><th>Fecha</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ============ CHOFER: CHECK-IN ============ -->
+    <div class="view" id="view-checkin">
+      <div class="pageTitle">Check-in de ruta</div>
+      <div class="pageSub">Inicia tu turno seleccionando la salida de hoy</div>
+      <div class="sectionCard" id="checkinActiveBox"></div>
+      <div class="sectionCard">
+        <h3>Salidas de hoy</h3>
+        <div class="tableWrap"><table id="tblSalidasChofer"><thead><tr><th>Ruta</th><th>Hora</th><th>Ocupación</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ============ CHOFER: PASAJEROS ============ -->
+    <div class="view" id="view-pasajeros">
+      <div class="pageTitle">Pasajeros de mi ruta</div>
+      <div class="pageSub">Lista de pasajeros con pago confirmado para tu salida activa</div>
+      <div class="sectionCard" id="pasajerosBox"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== MODALES ===================== -->
+<div class="modalBg" id="userModal">
+  <div class="modalCard">
+    <h3>Nuevo usuario</h3>
+    <div class="field"><label>Nombre completo</label><input id="nuFullname"></div>
+    <div class="field"><label>Correo</label><input id="nuEmail" type="email"></div>
+    <div class="field"><label>Contraseña temporal</label><input id="nuPassword" type="text"></div>
+    <div class="field"><label>Teléfono</label><input id="nuPhone"></div>
+    <div class="field"><label>Rol</label>
+      <select id="nuRole"><option value="vendedor">Vendedor</option><option value="chofer">Chofer</option><option value="admin">Administrador</option></select>
+    </div>
+    <div class="errorMsg" id="nuMsg"></div>
+    <div class="modalActions">
+      <button class="btn btn-outline" onclick="closeUserModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="crearUsuario()">Crear usuario</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalBg" id="ticketModal">
+  <div class="modalCard">
+    <div id="ticketContent"></div>
+    <div class="modalActions">
+      <button class="btn btn-outline" onclick="closeTicketModal()">Cerrar</button>
+      <button class="btn btn-primary" onclick="window.print()">Imprimir / PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalBg" id="pwdModal">
+  <div class="modalCard">
+    <h3>Restablecer contraseña</h3>
+    <div class="field"><label>Nueva contraseña</label><input id="pwdNew" type="text"></div>
+    <div class="errorMsg" id="pwdMsg"></div>
+    <div class="modalActions">
+      <button class="btn btn-outline" onclick="closePwdModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarResetPwd()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== CONFIG =====================
+const SUPABASE_URL = "https://vodbywkwchljubvtraqh.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvZGJ5d2t3Y2hsanVidnRyYXFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NzI0NDMsImV4cCI6MjEwMjE0ODQ0M30.stwdy8NjroeagtJ9wlhVofamSbuv8UzRnIwbaefviTI";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentProfile = null;
+let currentUser = null;
+let businessSettings = null;
+let resetPwdUserId = null;
+
+const NAV = {
+  admin: [
+    {id:'dashboard', label:'Panel general'},
+    {id:'rutas', label:'Rutas y precios'},
+    {id:'negocio', label:'Datos del negocio'},
+    {id:'usuarios', label:'Usuarios'},
+    {id:'reportes', label:'Reportes'},
+    {id:'buscar', label:'Buscar / cobrar'},
+  ],
+  vendedor: [
+    {id:'venta', label:'Nueva venta'},
+    {id:'especiales', label:'Viajes especiales'},
+    {id:'agenda', label:'Agenda'},
+    {id:'buscar', label:'Buscar / cobrar'},
+  ],
+  chofer: [
+    {id:'checkin', label:'Check-in / Check-out'},
+    {id:'pasajeros', label:'Mis pasajeros'},
+  ]
+};
+
+// ===================== AUTH =====================
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  if(!email || !password){ errEl.textContent = 'Ingresa correo y contraseña.'; return; }
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'Ingresando...'; btn.disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  btn.textContent = 'Ingresar'; btn.disabled = false;
+  if(error){ errEl.textContent = 'Correo o contraseña incorrectos.'; return; }
+  await afterLogin();
+}
+
+async function afterLogin(){
+  const { data: { user } } = await sb.auth.getUser();
+  currentUser = user;
+  if(!user) return;
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if(error || !profile){
+    document.getElementById('loginError').textContent = 'No se encontró tu perfil. Contacta al administrador.';
+    await sb.auth.signOut();
+    return;
+  }
+  if(profile.active === false){
+    document.getElementById('loginError').textContent = 'Tu cuenta está desactivada.';
+    await sb.auth.signOut();
+    return;
+  }
+  currentProfile = profile;
+  buildNav();
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').classList.add('active');
+  document.getElementById('userName').textContent = profile.full_name;
+  document.getElementById('userEmail').textContent = user.email;
+  const tag = document.getElementById('userRoleTag');
+  tag.textContent = profile.role;
+  tag.className = 'roleTag ' + profile.role;
+  await loadBusinessSettings();
+  goToView(NAV[profile.role][0].id);
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  location.reload();
+}
+
+// ===================== NAV =====================
+function buildNav(){
+  const wrap = document.getElementById('navButtons');
+  wrap.innerHTML = '';
+  NAV[currentProfile.role].forEach(item=>{
+    const b = document.createElement('button');
+    b.className = 'navBtn'; b.id = 'nav-'+item.id; b.textContent = item.label;
+    b.onclick = ()=>goToView(item.id);
+    wrap.appendChild(b);
+  });
+}
+
+async function goToView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.navBtn').forEach(b=>b.classList.remove('active'));
+  const view = document.getElementById('view-'+id);
+  if(view) view.classList.add('active');
+  const btn = document.getElementById('nav-'+id);
+  if(btn) btn.classList.add('active');
+
+  if(id==='dashboard') await loadDashboard();
+  if(id==='rutas') await loadRutas();
+  if(id==='negocio') await loadNegocioForm();
+  if(id==='usuarios') await loadUsuarios();
+  if(id==='reportes') { /* espera búsqueda */ }
+  if(id==='venta') await loadVentaForm();
+  if(id==='especiales') await loadEspeciales();
+  if(id==='agenda') await cargarAgenda();
+  if(id==='buscar') { /* espera búsqueda */ }
+  if(id==='checkin') await loadCheckin();
+  if(id==='pasajeros') await loadPasajeros();
+}
+
+function money(n){ return '$' + Number(n||0).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtDate(d){ if(!d) return '—'; const [y,m,day]=d.split('-'); return day+'/'+m+'/'+y; }
+function fmtTime(t){ if(!t) return '—'; return t.slice(0,5); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+// ===================== BUSINESS SETTINGS =====================
+async function loadBusinessSettings(){
+  const { data } = await sb.from('business_settings').select('*').eq('id',1).single();
+  businessSettings = data;
+}
+async function loadNegocioForm(){
+  await loadBusinessSettings();
+  if(!businessSettings) return;
+  document.getElementById('bizName').value = businessSettings.business_name || '';
+  document.getElementById('bizPhone').value = businessSettings.phone || '';
+  document.getElementById('bizAddress').value = businessSettings.address || '';
+  document.getElementById('bizEmail').value = businessSettings.email || '';
+  document.getElementById('bizLogo').value = businessSettings.logo_url || '';
+}
+async function guardarNegocio(){
+  const payload = {
+    business_name: document.getElementById('bizName').value.trim(),
+    phone: document.getElementById('bizPhone').value.trim(),
+    address: document.getElementById('bizAddress').value.trim(),
+    email: document.getElementById('bizEmail').value.trim(),
+    logo_url: document.getElementById('bizLogo').value.trim(),
+  };
+  const { error } = await sb.from('business_settings').update(payload).eq('id',1);
+  const msg = document.getElementById('bizMsg');
+  msg.style.color = error ? '#fca5a5' : '#86efac';
+  msg.textContent = error ? error.message : 'Guardado correctamente.';
+  await loadBusinessSettings();
+}
+
+// ===================== DASHBOARD =====================
+async function loadDashboard(){
+  const today = todayStr();
+  const { data: bookingsToday } = await sb.from('bookings').select('price,payment_status,created_at').gte('created_at', today+'T00:00:00').lte('created_at', today+'T23:59:59');
+  const { data: specialToday } = await sb.from('special_trips').select('price,payment_status,created_at').gte('created_at', today+'T00:00:00').lte('created_at', today+'T23:59:59');
+  const all = [...(bookingsToday||[]), ...(specialToday||[])];
+  const ventas = all.length;
+  const ingresos = all.filter(x=>x.payment_status==='paid').reduce((a,b)=>a+Number(b.price||0),0);
+
+  const { data: trips } = await sb.from('trip_instances').select('*, routes(origin,destination,code)').eq('trip_date', today).order('departure_time');
+  const asientos = (trips||[]).reduce((a,t)=>a+t.seats_booked,0);
+
+  document.getElementById('stat-ventasHoy').textContent = ventas;
+  document.getElementById('stat-ingresosHoy').textContent = money(ingresos);
+  document.getElementById('stat-asientosHoy').textContent = asientos;
+  document.getElementById('stat-salidasHoy').textContent = (trips||[]).length;
+
+  const tbody = document.querySelector('#tblSalidasHoy tbody');
+  tbody.innerHTML = '';
+  (trips||[]).forEach(t=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.routes.origin} → ${t.routes.destination}</td><td>${fmtTime(t.departure_time)}</td><td>${t.seats_booked}/${t.total_seats}</td><td>${money(t.price)}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('dashRefresh').textContent = 'actualizado ' + new Date().toLocaleTimeString('es-MX');
+}
+
+// ===================== RUTAS / HORARIOS =====================
+async function loadRutas(){
+  const { data: routes } = await sb.from('routes').select('*').order('code');
+  const { data: schedules } = await sb.from('route_schedules').select('*').order('departure_time');
+  const container = document.getElementById('rutasContainer');
+  container.innerHTML = '';
+  const dayNames = ['D','L','M','M','J','V','S'];
+  (routes||[]).forEach(route=>{
+    const relSchedules = (schedules||[]).filter(s=>s.route_id===route.id);
+    const card = document.createElement('div');
+    card.className = 'sectionCard';
+    let rows = relSchedules.map(s=>`
+      <tr>
+        <td>${fmtTime(s.departure_time)}</td>
+        <td><input type="number" value="${s.default_price}" step="0.01" style="width:90px;padding:6px;background:var(--panel2);border:1px solid var(--border);border-radius:6px;color:var(--text)" onchange="updateSchedule('${s.id}','default_price',this.value)"></td>
+        <td><input type="number" value="${s.default_seats}" style="width:70px;padding:6px;background:var(--panel2);border:1px solid var(--border);border-radius:6px;color:var(--text)" onchange="updateSchedule('${s.id}','default_seats',this.value)"></td>
+        <td>${dayNames.map((d,i)=>`<label style="margin-right:4px;font-size:11px"><input type="checkbox" ${s.days_of_week.includes(i)?'checked':''} onchange="toggleDay('${s.id}',${i},this.checked, ${JSON.stringify(s.days_of_week)})"> ${d}</label>`).join('')}</td>
+        <td><input type="checkbox" ${s.active?'checked':''} onchange="updateSchedule('${s.id}','active',this.checked)"></td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteSchedule('${s.id}')">Eliminar</button></td>
+      </tr>`).join('');
+    card.innerHTML = `
+      <h3>${route.origin} → ${route.destination} <span class="sub">${route.code}</span></h3>
+      <div class="tableWrap"><table>
+        <thead><tr><th>Hora</th><th>Precio</th><th>Asientos</th><th>Días</th><th>Activo</th><th></th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="6" class="tag">Sin horarios configurados</td></tr>'}</tbody>
+      </table></div>
+      <div class="formRow" style="margin-top:14px">
+        <div class="field" style="max-width:120px"><label>Hora</label><input type="time" id="newTime-${route.id}"></div>
+        <div class="field" style="max-width:110px"><label>Precio</label><input type="number" id="newPrice-${route.id}" step="0.01"></div>
+        <div class="field" style="max-width:90px"><label>Asientos</label><input type="number" id="newSeats-${route.id}" value="18"></div>
+        <button class="btn btn-outline" onclick="addSchedule('${route.id}')">+ Agregar horario</button>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+async function addSchedule(routeId){
+  const time = document.getElementById('newTime-'+routeId).value;
+  const price = document.getElementById('newPrice-'+routeId).value || 0;
+  const seats = document.getElementById('newSeats-'+routeId).value || 18;
+  if(!time){ alert('Indica una hora de salida.'); return; }
+  const { error } = await sb.from('route_schedules').insert({ route_id: routeId, departure_time: time, default_price: price, default_seats: seats });
+  if(error){ alert(error.message); return; }
+  await loadRutas();
+}
+async function updateSchedule(id, field, value){
+  const payload = {}; payload[field] = (field==='active') ? value : value;
+  await sb.from('route_schedules').update(payload).eq('id', id);
+}
+async function toggleDay(id, dayIdx, checked, currentDays){
+  let days = [...currentDays];
+  if(checked && !days.includes(dayIdx)) days.push(dayIdx);
+  if(!checked) days = days.filter(d=>d!==dayIdx);
+  await sb.from('route_schedules').update({ days_of_week: days }).eq('id', id);
+}
+async function deleteSchedule(id){
+  if(!confirm('¿Eliminar este horario?')) return;
+  await sb.from('route_schedules').delete().eq('id', id);
+  await loadRutas();
+}
+async function generarSalidas(){
+  const days = parseInt(document.getElementById('genDays').value || '21');
+  const { data, error } = await sb.rpc('generate_trip_instances', { p_days_ahead: days });
+  if(error){ alert(error.message); return; }
+  alert('Se generaron ' + data + ' nuevas salidas.');
+}
+
+// ===================== USUARIOS =====================
+async function loadUsuarios(){
+  const { data } = await sb.from('profiles').select('*').order('role');
+  const tbody = document.querySelector('#tblUsuarios tbody');
+  tbody.innerHTML = '';
+  (data||[]).forEach(u=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${u.full_name}</td>
+      <td><span class="roleTag ${u.role}">${u.role}</span></td>
+      <td>${u.phone||'—'}</td>
+      <td>${u.active? '<span class="badge paid">Activo</span>' : '<span class="badge cancelled">Inactivo</span>'}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="openPwdModal('${u.id}')">Contraseña</button>
+        <button class="btn ${u.active?'btn-danger':'btn-ok'} btn-sm" onclick="toggleUserActive('${u.id}', ${!u.active})">${u.active?'Desactivar':'Activar'}</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteUsuario('${u.id}')">Eliminar</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+function openUserModal(){ document.getElementById('userModal').classList.add('active'); document.getElementById('nuMsg').textContent=''; }
+function closeUserModal(){ document.getElementById('userModal').classList.remove('active'); }
+async function crearUsuario(){
+  const payload = {
+    full_name: document.getElementById('nuFullname').value.trim(),
+    email: document.getElementById('nuEmail').value.trim(),
+    password: document.getElementById('nuPassword').value,
+    phone: document.getElementById('nuPhone').value.trim(),
+    role: document.getElementById('nuRole').value,
+  };
+  const msg = document.getElementById('nuMsg');
+  if(!payload.full_name || !payload.email || !payload.password){ msg.textContent = 'Completa todos los campos obligatorios.'; return; }
+  const { data: { session } } = await sb.auth.getSession();
+  const res = await fetch(SUPABASE_URL + '/functions/v1/admin-create-user', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+session.access_token },
+    body: JSON.stringify(payload)
+  });
+  const json = await res.json();
+  if(!res.ok){ msg.textContent = json.error || 'Error al crear usuario.'; return; }
+  closeUserModal();
+  await loadUsuarios();
+}
+async function toggleUserActive(id, active){
+  const { data: { session } } = await sb.auth.getSession();
+  const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+    body: JSON.stringify({ action:'set_active', user_id:id, active })
+  });
+  if(!res.ok){ const j = await res.json(); alert(j.error); return; }
+  await loadUsuarios();
+}
+async function deleteUsuario(id){
+  if(!confirm('¿Eliminar este usuario permanentemente?')) return;
+  const { data: { session } } = await sb.auth.getSession();
+  const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+    body: JSON.stringify({ action:'delete', user_id:id })
+  });
+  if(!res.ok){ const j = await res.json(); alert(j.error); return; }
+  await loadUsuarios();
+}
+function openPwdModal(id){ resetPwdUserId = id; document.getElementById('pwdModal').classList.add('active'); document.getElementById('pwdMsg').textContent=''; document.getElementById('pwdNew').value=''; }
+function closePwdModal(){ document.getElementById('pwdModal').classList.remove('active'); }
+async function confirmarResetPwd(){
+  const pwd = document.getElementById('pwdNew').value;
+  const msg = document.getElementById('pwdMsg');
+  const { data: { session } } = await sb.auth.getSession();
+  const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+    body: JSON.stringify({ action:'reset_password', user_id:resetPwdUserId, new_password: pwd })
+  });
+  const json = await res.json();
+  if(!res.ok){ msg.textContent = json.error; return; }
+  closePwdModal();
+}
+
+// ===================== REPORTES =====================
+async function buscarReportes(){
+  const folio = document.getElementById('rFolio').value.trim();
+  const desde = document.getElementById('rDesde').value;
+  const hasta = document.getElementById('rHasta').value;
+  const cliente = document.getElementById('rCliente').value.trim();
+
+  let bq = sb.from('bookings').select('folio,price,payment_status,passenger_name,passenger_phone,created_at, trip_instances(trip_date, routes(origin,destination))');
+  let eq = sb.from('special_trips').select('folio,price,payment_status,client_name,client_phone,trip_date,origin,destination,created_at');
+
+  if(folio){ bq = bq.ilike('folio','%'+folio+'%'); eq = eq.ilike('folio','%'+folio+'%'); }
+  if(cliente){ bq = bq.or(`passenger_name.ilike.%${cliente}%,passenger_phone.ilike.%${cliente}%`); eq = eq.or(`client_name.ilike.%${cliente}%,client_phone.ilike.%${cliente}%`); }
+
+  const [{data:bookings}, {data:specials}] = await Promise.all([bq, eq]);
+
+  let rows = [];
+  (bookings||[]).forEach(b=>{
+    const d = b.trip_instances?.trip_date;
+    if(desde && d < desde) return; if(hasta && d > hasta) return;
+    rows.push({folio:b.folio, tipo:'Ruta fija', ruta: b.trip_instances ? (b.trip_instances.routes.origin+' → '+b.trip_instances.routes.destination) : '—', fecha:d, cliente:b.passenger_name, precio:b.price, estado:b.payment_status});
+  });
+  (specials||[]).forEach(s=>{
+    if(desde && s.trip_date < desde) return; if(hasta && s.trip_date > hasta) return;
+    rows.push({folio:s.folio, tipo:'Especial', ruta: s.origin+' → '+s.destination, fecha:s.trip_date, cliente:s.client_name, precio:s.price, estado:s.payment_status});
+  });
+  rows.sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||''));
+
+  window._lastReportRows = rows;
+  const tbody = document.querySelector('#tblReportes tbody');
+  tbody.innerHTML = '';
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.folio}</td><td>${r.tipo}</td><td>${r.ruta}</td><td>${fmtDate(r.fecha)}</td><td>${r.cliente}</td><td>${money(r.precio)}</td><td><span class="badge ${r.estado}">${r.estado}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function exportarCSV(){
+  const rows = window._lastReportRows || [];
+  if(!rows.length){ alert('Primero realiza una búsqueda.'); return; }
+  let csv = 'Folio,Tipo,Ruta,Fecha,Cliente,Precio,Estado\n';
+  rows.forEach(r=>{ csv += `"${r.folio}","${r.tipo}","${r.ruta}","${r.fecha||''}","${r.cliente}","${r.precio}","${r.estado}"\n`; });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'reporte_viajesapp_'+todayStr()+'.csv'; a.click();
+}
+
+// ===================== VENTA (rutas fijas) =====================
+async function loadVentaForm(){
+  const { data: routes } = await sb.from('routes').select('*').eq('active',true).order('code');
+  const sel = document.getElementById('ventaRuta');
+  sel.innerHTML = (routes||[]).map(r=>`<option value="${r.id}">${r.origin} → ${r.destination}</option>`).join('');
+  document.getElementById('ventaFecha').value = todayStr();
+  await cargarSalidasParaVenta();
+}
+async function cargarSalidasParaVenta(){
+  const routeId = document.getElementById('ventaRuta').value;
+  const fecha = document.getElementById('ventaFecha').value;
+  if(!routeId || !fecha) return;
+  const { data: trips } = await sb.from('trip_instances').select('*').eq('route_id', routeId).eq('trip_date', fecha).order('departure_time');
+  const sel = document.getElementById('ventaSalida');
+  sel.innerHTML = (trips||[]).map(t=>`<option value="${t.id}" data-price="${t.price}" data-seats="${t.total_seats-t.seats_booked}">${fmtTime(t.departure_time)} — ${t.total_seats-t.seats_booked}/${t.total_seats} disponibles</option>`).join('');
+  updateVentaSeatInfo();
+  sel.onchange = updateVentaSeatInfo;
+}
+function updateVentaSeatInfo(){
+  const sel = document.getElementById('ventaSalida');
+  const opt = sel.options[sel.selectedIndex];
+  const info = document.getElementById('ventaSeatInfo');
+  if(!opt){ info.textContent = 'No hay salidas para esta fecha. Ve a Rutas y precios para generarlas.'; return; }
+  const seats = opt.getAttribute('data-seats');
+  const price = opt.getAttribute('data-price');
+  info.textContent = seats + ' asientos disponibles · precio sugerido ' + money(price);
+  document.getElementById('ventaPrecio').value = price;
+}
+async function crearApartado(){ await guardarVenta(false); }
+async function crearVentaPagada(){ await guardarVenta(true); }
+async function guardarVenta(pagado){
+  const msg = document.getElementById('ventaMsg'); msg.textContent='';
+  const tripId = document.getElementById('ventaSalida').value;
+  const nombre = document.getElementById('ventaNombre').value.trim();
+  const telefono = document.getElementById('ventaTelefono').value.trim();
+  const correo = document.getElementById('ventaCorreo').value.trim();
+  const abordaje = document.getElementById('ventaAbordaje').value.trim();
+  const precio = document.getElementById('ventaPrecio').value;
+  if(!tripId || !nombre || !telefono){ msg.textContent = 'Completa ruta, salida, nombre y teléfono.'; return; }
+
+  const payload = {
+    trip_instance_id: tripId, passenger_name: nombre, passenger_phone: telefono,
+    passenger_email: correo||null, boarding_point: abordaje||null, price: precio||0,
+    payment_status: pagado ? 'paid' : 'pending', sold_by: currentUser.id,
+    paid_at: pagado ? new Date().toISOString() : null,
+  };
+  const { data, error } = await sb.from('bookings').insert(payload).select().single();
+  if(error){ msg.textContent = error.message; return; }
+  ['ventaNombre','ventaTelefono','ventaCorreo','ventaAbordaje'].forEach(id=>document.getElementById(id).value='');
+  await cargarSalidasParaVenta();
+  if(pagado){ await showTicketForBooking(data.id); }
+  else { msg.style.color = '#86efac'; msg.textContent = 'Apartado creado: ' + data.folio; }
+}
+
+// ===================== VIAJES ESPECIALES =====================
+async function loadEspeciales(){
+  document.getElementById('espFecha').value = todayStr();
+  const { data } = await sb.from('special_trips').select('*').order('created_at',{ascending:false}).limit(20);
+  const tbody = document.querySelector('#tblEspeciales tbody');
+  tbody.innerHTML = '';
+  (data||[]).forEach(s=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.folio}</td><td>${s.origin} → ${s.destination}</td><td>${fmtDate(s.trip_date)} ${fmtTime(s.trip_time)}</td><td>${s.client_name}</td><td><span class="badge ${s.payment_status}">${s.payment_status}</span></td>
+      <td>${s.payment_status!=='paid'?`<button class="btn btn-ok btn-sm" onclick="marcarPagadoEspecial('${s.id}')">Cobrar</button>`:`<button class="btn btn-outline btn-sm" onclick="showTicketForSpecial('${s.id}')">Ticket</button>`}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+async function crearEspecial(pagado){
+  const msg = document.getElementById('espMsg'); msg.textContent='';
+  const payload = {
+    origin: document.getElementById('espOrigen').value.trim(),
+    destination: document.getElementById('espDestino').value.trim(),
+    trip_date: document.getElementById('espFecha').value,
+    trip_time: document.getElementById('espHora').value,
+    price: document.getElementById('espPrecio').value || 0,
+    client_name: document.getElementById('espCliente').value.trim(),
+    client_phone: document.getElementById('espTelefono').value.trim(),
+    client_email: document.getElementById('espCorreo').value.trim() || null,
+    payment_status: pagado ? 'paid' : 'pending',
+    sold_by: currentUser.id,
+    paid_at: pagado ? new Date().toISOString() : null,
+  };
+  if(!payload.origin || !payload.destination || !payload.trip_date || !payload.trip_time || !payload.client_name || !payload.client_phone){
+    msg.textContent = 'Completa todos los campos obligatorios.'; return;
+  }
+  const { data, error } = await sb.from('special_trips').insert(payload).select().single();
+  if(error){ msg.textContent = error.message; return; }
+  ['espOrigen','espDestino','espPrecio','espCliente','espTelefono','espCorreo'].forEach(id=>document.getElementById(id).value='');
+  await loadEspeciales();
+  if(pagado) await showTicketForSpecial(data.id);
+  else { msg.style.color='#86efac'; msg.textContent = 'Apartado creado: ' + data.folio; }
+}
+async function marcarPagadoEspecial(id){
+  await sb.from('special_trips').update({ payment_status:'paid', paid_at: new Date().toISOString() }).eq('id', id);
+  await loadEspeciales();
+  await showTicketForSpecial(id);
+}
+
+// ===================== AGENDA =====================
+async function cargarAgenda(){
+  const desde = document.getElementById('agendaDesde').value || todayStr();
+  document.getElementById('agendaDesde').value = desde;
+  const { data } = await sb.from('trip_instances').select('*, routes(origin,destination)').gte('trip_date', desde).order('trip_date').order('departure_time').limit(100);
+  const tbody = document.querySelector('#tblAgenda tbody');
+  tbody.innerHTML = '';
+  (data||[]).forEach(t=>{
+    const pct = Math.round((t.seats_booked/t.total_seats)*100);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.routes.origin} → ${t.routes.destination}</td><td>${fmtDate(t.trip_date)}</td><td>${fmtTime(t.departure_time)}</td>
+      <td>${t.seats_booked}/${t.total_seats}<div class="seatBar"><div style="width:${pct}%"></div></div></td><td>${money(t.price)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ===================== BUSCAR / COBRAR =====================
+async function buscarReservas(){
+  const q = document.getElementById('buscarQ').value.trim();
+  if(!q){ return; }
+  const { data: bookings } = await sb.from('bookings').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))')
+    .or(`folio.ilike.%${q}%,passenger_name.ilike.%${q}%,passenger_phone.ilike.%${q}%`).limit(30);
+  const { data: specials } = await sb.from('special_trips').select('*')
+    .or(`folio.ilike.%${q}%,client_name.ilike.%${q}%,client_phone.ilike.%${q}%`).limit(30);
+
+  const tbody = document.querySelector('#tblBuscar tbody');
+  tbody.innerHTML = '';
+  (bookings||[]).forEach(b=>{
+    const tr = document.createElement('tr');
+    const fecha = b.trip_instances ? fmtDate(b.trip_instances.trip_date)+' '+fmtTime(b.trip_instances.departure_time) : '—';
+    tr.innerHTML = `<td>${b.folio}</td><td>Ruta fija</td><td>${b.passenger_name}</td><td>${fecha}</td><td>${money(b.price)}</td><td><span class="badge ${b.payment_status}">${b.payment_status}</span></td>
+      <td>${b.payment_status!=='paid'?`<button class="btn btn-ok btn-sm" onclick="marcarPagadoBooking('${b.id}')">Cobrar</button>`:''} <button class="btn btn-outline btn-sm" onclick="showTicketForBooking('${b.id}')">Ticket</button> ${b.payment_status!=='cancelled'?`<button class="btn btn-danger btn-sm" onclick="cancelarBooking('${b.id}')">Cancelar</button>`:''}</td>`;
+    tbody.appendChild(tr);
+  });
+  (specials||[]).forEach(s=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.folio}</td><td>Especial</td><td>${s.client_name}</td><td>${fmtDate(s.trip_date)} ${fmtTime(s.trip_time)}</td><td>${money(s.price)}</td><td><span class="badge ${s.payment_status}">${s.payment_status}</span></td>
+      <td>${s.payment_status!=='paid'?`<button class="btn btn-ok btn-sm" onclick="marcarPagadoEspecial('${s.id}')">Cobrar</button>`:''} <button class="btn btn-outline btn-sm" onclick="showTicketForSpecial('${s.id}')">Ticket</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+async function marcarPagadoBooking(id){
+  await sb.from('bookings').update({ payment_status:'paid', paid_at: new Date().toISOString() }).eq('id', id);
+  await buscarReservas();
+  await showTicketForBooking(id);
+}
+async function cancelarBooking(id){
+  if(!confirm('¿Cancelar esta reserva?')) return;
+  await sb.from('bookings').update({ payment_status:'cancelled' }).eq('id', id);
+  await buscarReservas();
+}
+
+// ===================== TICKETS =====================
+function ticketHtml({folio, ruta, fecha, hora, pasajero, telefono, precio}){
+  const biz = businessSettings || {};
+  return `
+    <div class="ticket">
+      ${biz.logo_url ? `<img src="${biz.logo_url}" style="max-height:50px;margin-bottom:8px">` : ''}
+      <h2>${biz.business_name || 'Viajes'}</h2>
+      <div style="font-size:11px;color:#555">${biz.address||''} ${biz.phone? '· Tel. '+biz.phone : ''}</div>
+      <div class="folio">Folio: <b>${folio}</b></div>
+      <hr>
+      <table>
+        <tr><td>Ruta</td><td style="text-align:right"><b>${ruta}</b></td></tr>
+        <tr><td>Fecha</td><td style="text-align:right">${fecha}</td></tr>
+        <tr><td>Hora</td><td style="text-align:right">${hora}</td></tr>
+        <tr><td>Pasajero</td><td style="text-align:right">${pasajero}</td></tr>
+        <tr><td>Teléfono</td><td style="text-align:right">${telefono}</td></tr>
+        <tr><td>Precio</td><td style="text-align:right"><b>${money(precio)}</b></td></tr>
+      </table>
+      <hr>
+      <div class="qrWrap"><img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(folio)}" width="140" height="140"></div>
+      <div style="text-align:center;font-size:11px;color:#777;margin-top:8px">Presenta este ticket al abordar</div>
+    </div>`;
+}
+async function showTicketForBooking(id){
+  const { data: b } = await sb.from('bookings').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))').eq('id', id).single();
+  if(!b) return;
+  await sb.from('bookings').update({ ticket_generated:true }).eq('id', id);
+  const ruta = b.trip_instances ? (b.trip_instances.routes.origin+' → '+b.trip_instances.routes.destination) : '—';
+  document.getElementById('ticketContent').innerHTML = ticketHtml({
+    folio:b.folio, ruta, fecha: fmtDate(b.trip_instances?.trip_date), hora: fmtTime(b.trip_instances?.departure_time),
+    pasajero:b.passenger_name, telefono:b.passenger_phone, precio:b.price
+  });
+  document.getElementById('ticketModal').classList.add('active');
+}
+async function showTicketForSpecial(id){
+  const { data: s } = await sb.from('special_trips').select('*').eq('id', id).single();
+  if(!s) return;
+  await sb.from('special_trips').update({ ticket_generated:true }).eq('id', id);
+  document.getElementById('ticketContent').innerHTML = ticketHtml({
+    folio:s.folio, ruta: s.origin+' → '+s.destination, fecha: fmtDate(s.trip_date), hora: fmtTime(s.trip_time),
+    pasajero:s.client_name, telefono:s.client_phone, precio:s.price
+  });
+  document.getElementById('ticketModal').classList.add('active');
+}
+function closeTicketModal(){ document.getElementById('ticketModal').classList.remove('active'); }
+
+// ===================== CHOFER: CHECK-IN / CHECK-OUT =====================
+async function getActiveCheckin(){
+  const { data } = await sb.from('driver_checkins').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))')
+    .eq('driver_id', currentUser.id).eq('status','checked_in').order('created_at',{ascending:false}).limit(1);
+  return (data && data[0]) || null;
+}
+async function loadCheckin(){
+  const active = await getActiveCheckin();
+  const box = document.getElementById('checkinActiveBox');
+  if(active){
+    box.innerHTML = `<h3>Turno activo</h3>
+      <p>${active.trip_instances.routes.origin} → ${active.trip_instances.routes.destination}<br>
+      ${fmtDate(active.trip_instances.trip_date)} · ${fmtTime(active.trip_instances.departure_time)}<br>
+      Check-in: ${new Date(active.check_in_at).toLocaleTimeString('es-MX')}</p>
+      <button class="btn btn-danger" onclick="hacerCheckout('${active.id}')">Hacer check-out</button>`;
+  } else {
+    box.innerHTML = `<h3>Sin turno activo</h3><p class="tag">Selecciona una salida de la lista para iniciar tu check-in.</p>`;
+  }
+
+  const today = todayStr();
+  const { data: trips } = await sb.from('trip_instances').select('*, routes(origin,destination)').eq('trip_date', today).order('departure_time');
+  const tbody = document.querySelector('#tblSalidasChofer tbody');
+  tbody.innerHTML = '';
+  (trips||[]).forEach(t=>{
+    const tr = document.createElement('tr');
+    const disabled = active ? 'disabled' : '';
+    tr.innerHTML = `<td>${t.routes.origin} → ${t.routes.destination}</td><td>${fmtTime(t.departure_time)}</td><td>${t.seats_booked}/${t.total_seats}</td>
+      <td><button class="btn btn-primary btn-sm" ${disabled} onclick="hacerCheckin('${t.id}')">Check-in</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+async function hacerCheckin(tripId){
+  const { error } = await sb.from('driver_checkins').insert({ driver_id: currentUser.id, trip_instance_id: tripId, check_in_at: new Date().toISOString(), status:'checked_in' });
+  if(error){ alert(error.message); return; }
+  await loadCheckin();
+}
+async function hacerCheckout(checkinId){
+  await sb.from('driver_checkins').update({ check_out_at: new Date().toISOString(), status:'checked_out' }).eq('id', checkinId);
+  await loadCheckin();
+}
+async function loadPasajeros(){
+  const active = await getActiveCheckin();
+  const box = document.getElementById('pasajerosBox');
+  if(!active){ box.innerHTML = '<p class="tag">No tienes un turno activo. Haz check-in primero.</p>'; return; }
+  const { data: bookings } = await sb.from('bookings').select('*').eq('trip_instance_id', active.trip_instance_id).eq('payment_status','paid').order('passenger_name');
+  let html = `<h3>${active.trip_instances.routes.origin} → ${active.trip_instances.routes.destination} · ${fmtTime(active.trip_instances.departure_time)}</h3>`;
+  html += `<div class="tableWrap"><table><thead><tr><th>Pasajero</th><th>Teléfono</th><th>Lugar de abordaje</th></tr></thead><tbody>`;
+  (bookings||[]).forEach(b=>{ html += `<tr><td>${b.passenger_name}</td><td>${b.passenger_phone}</td><td>${b.boarding_point||'—'}</td></tr>`; });
+  html += `</tbody></table></div>`;
+  if(!bookings || !bookings.length) html += '<p class="tag" style="margin-top:10px">Aún no hay pasajeros con pago confirmado.</p>';
+  box.innerHTML = html;
+}
+
+// ===================== INIT =====================
+(async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){ await afterLogin(); }
+  document.getElementById('loginPassword').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+})();
+</script>
+</body>
+</html>
