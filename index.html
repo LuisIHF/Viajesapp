@@ -147,7 +147,6 @@ tr:last-child td{border-bottom:none}
     </div>
     <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Ingresar</button>
     <div class="errorMsg" id="loginError"></div>
-    <div class="hintMsg">Acceso inicial de administrador:<br><b>admin@viajesapp.mx</b> / <b>Viajes2026Admin!</b><br>Se recomienda cambiar la contraseña después del primer ingreso.</div>
   </div>
 </div>
 
@@ -655,34 +654,42 @@ async function crearUsuario(){
   const msg = document.getElementById('nuMsg');
   if(!payload.full_name || !payload.email || !payload.password){ msg.textContent = 'Completa todos los campos obligatorios.'; return; }
   const { data: { session } } = await sb.auth.getSession();
-  const res = await fetch(SUPABASE_URL + '/functions/v1/admin-create-user', {
-    method: 'POST',
-    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+session.access_token },
-    body: JSON.stringify(payload)
-  });
-  const json = await res.json();
-  if(!res.ok){ msg.textContent = json.error || 'Error al crear usuario.'; return; }
-  closeUserModal();
-  await loadUsuarios();
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/admin-create-user', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+session.access_token },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if(!res.ok){ msg.textContent = json.error || 'Error al crear usuario.'; return; }
+    closeUserModal();
+    await loadUsuarios();
+  }catch(e){
+    msg.textContent = 'Error de conexión: ' + e.message;
+  }
 }
 async function toggleUserActive(id, active){
   const { data: { session } } = await sb.auth.getSession();
-  const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
-    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-    body: JSON.stringify({ action:'set_active', user_id:id, active })
-  });
-  if(!res.ok){ const j = await res.json(); alert(j.error); return; }
-  await loadUsuarios();
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify({ action:'set_active', user_id:id, active })
+    });
+    if(!res.ok){ const j = await res.json(); alert(j.error); return; }
+    await loadUsuarios();
+  }catch(e){ alert('Error de conexión: ' + e.message); }
 }
 async function deleteUsuario(id){
   if(!confirm('¿Eliminar este usuario permanentemente?')) return;
   const { data: { session } } = await sb.auth.getSession();
-  const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
-    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-    body: JSON.stringify({ action:'delete', user_id:id })
-  });
-  if(!res.ok){ const j = await res.json(); alert(j.error); return; }
-  await loadUsuarios();
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify({ action:'delete', user_id:id })
+    });
+    if(!res.ok){ const j = await res.json(); alert(j.error); return; }
+    await loadUsuarios();
+  }catch(e){ alert('Error de conexión: ' + e.message); }
 }
 function openPwdModal(id){ resetPwdUserId = id; document.getElementById('pwdModal').classList.add('active'); document.getElementById('pwdMsg').textContent=''; document.getElementById('pwdNew').value=''; }
 function closePwdModal(){ document.getElementById('pwdModal').classList.remove('active'); }
@@ -690,13 +697,15 @@ async function confirmarResetPwd(){
   const pwd = document.getElementById('pwdNew').value;
   const msg = document.getElementById('pwdMsg');
   const { data: { session } } = await sb.auth.getSession();
-  const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
-    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-    body: JSON.stringify({ action:'reset_password', user_id:resetPwdUserId, new_password: pwd })
-  });
-  const json = await res.json();
-  if(!res.ok){ msg.textContent = json.error; return; }
-  closePwdModal();
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify({ action:'reset_password', user_id:resetPwdUserId, new_password: pwd })
+    });
+    const json = await res.json();
+    if(!res.ok){ msg.textContent = json.error; return; }
+    closePwdModal();
+  }catch(e){ msg.textContent = 'Error de conexión: ' + e.message; }
 }
 
 // ===================== REPORTES =====================
