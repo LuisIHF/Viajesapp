@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ViajesApp · Sistema de Boletaje</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
 :root{
   --bg:#0b1220; --panel:#111a2c; --panel2:#16223a; --border:#233150;
@@ -128,6 +131,21 @@ tr:last-child td{border-bottom:none}
   .navBtn{white-space:nowrap}
   .mainArea{padding:16px}
 }
+
+/* ---------- Monitoreo / GPS ---------- */
+#liveMap{width:100%;height:380px;border-radius:var(--radius);border:1px solid var(--border);background:#0e1626}
+.leaflet-popup-content-wrapper{background:var(--panel);color:var(--text);border-radius:8px}
+.leaflet-popup-tip{background:var(--panel)}
+.leaflet-container{background:#0e1626}
+.pendingCard{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;flex-wrap:wrap}
+.pendingCard .info{font-size:13px}
+.pendingCard .info b{display:block;font-size:14px;margin-bottom:2px}
+.tripCard{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;flex-wrap:wrap}
+.liveDot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:6px;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.chartWrap{position:relative;height:260px}
+.kpiRow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.gpsStatus{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:8px}
 </style>
 </head>
 <body>
@@ -179,6 +197,52 @@ tr:last-child td{border-bottom:none}
       <div class="sectionCard">
         <h3>Salidas de hoy <span class="sub" id="dashRefresh">actualizado ahora</span></h3>
         <div class="tableWrap"><table id="tblSalidasHoy"><thead><tr><th>Ruta</th><th>Hora</th><th>Ocupación</th><th>Precio</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ============ ADMIN/VENDEDOR: MONITOREO EN VIVO ============ -->
+    <div class="view" id="view-monitoreo">
+      <div class="pageTitle">Monitoreo en vivo</div>
+      <div class="pageSub">Aprueba salidas y sigue el trayecto de cada unidad en tiempo real</div>
+
+      <div class="sectionCard">
+        <h3>Solicitudes de salida pendientes <span class="sub" id="pendingCount"></span></h3>
+        <div id="pendingList"><p class="tag">No hay solicitudes pendientes.</p></div>
+      </div>
+
+      <div class="sectionCard">
+        <h3>Viajes en curso <span class="sub" id="activeTripsCount"></span></h3>
+        <div id="activeTripsList"><p class="tag">No hay viajes en curso.</p></div>
+      </div>
+
+      <div class="sectionCard">
+        <h3>Mapa en vivo <span class="sub" id="mapUpdatedAt"></span></h3>
+        <div id="liveMap"></div>
+      </div>
+    </div>
+
+    <!-- ============ ADMIN: HISTORIAL Y ESTADÍSTICAS ============ -->
+    <div class="view" id="view-historial">
+      <div class="pageTitle">Historial y estadísticas</div>
+      <div class="pageSub">Datos históricos de ventas, ocupación y viajes</div>
+      <div class="toolbar">
+        <div class="field"><label>Desde</label><input type="date" id="histDesde"></div>
+        <div class="field"><label>Hasta</label><input type="date" id="histHasta"></div>
+        <button class="btn btn-primary" onclick="loadHistorial()">Actualizar</button>
+      </div>
+      <div class="grid grid-4 kpiRow" style="margin-bottom:18px">
+        <div class="card statCard"><div class="label">Viajes vendidos</div><div class="value" id="hist-ventas">—</div></div>
+        <div class="card statCard"><div class="label">Ingresos totales</div><div class="value brand" id="hist-ingresos">—</div></div>
+        <div class="card statCard"><div class="label">Salidas completadas</div><div class="value" id="hist-completadas">—</div></div>
+        <div class="card statCard"><div class="label">Ocupación promedio</div><div class="value" id="hist-ocupacion">—</div></div>
+      </div>
+      <div class="grid grid-2">
+        <div class="sectionCard"><h3>Ingresos por día</h3><div class="chartWrap"><canvas id="chartIngresos"></canvas></div></div>
+        <div class="sectionCard"><h3>Ventas por ruta</h3><div class="chartWrap"><canvas id="chartRutas"></canvas></div></div>
+      </div>
+      <div class="sectionCard">
+        <h3>Historial de salidas (check-ins)</h3>
+        <div class="tableWrap"><table id="tblHistCheckins"><thead><tr><th>Chofer</th><th>Ruta</th><th>Fecha</th><th>Solicitado</th><th>Aprobado</th><th>Salida→Llegada</th><th>Estado</th></tr></thead><tbody></tbody></table></div>
       </div>
     </div>
 
@@ -322,7 +386,7 @@ tr:last-child td{border-bottom:none}
     <!-- ============ CHOFER: CHECK-IN ============ -->
     <div class="view" id="view-checkin">
       <div class="pageTitle">Check-in de ruta</div>
-      <div class="pageSub">Inicia tu turno seleccionando la salida de hoy</div>
+      <div class="pageSub">Solicita tu salida; un administrador o vendedor debe aprobarla para iniciar el trayecto</div>
       <div class="sectionCard" id="checkinActiveBox"></div>
       <div class="sectionCard">
         <h3>Salidas de hoy</h3>
@@ -395,6 +459,8 @@ let resetPwdUserId = null;
 const NAV = {
   admin: [
     {id:'dashboard', label:'Panel general'},
+    {id:'monitoreo', label:'Monitoreo en vivo'},
+    {id:'historial', label:'Historial y estadísticas'},
     {id:'rutas', label:'Rutas y precios'},
     {id:'negocio', label:'Datos del negocio'},
     {id:'usuarios', label:'Usuarios'},
@@ -404,6 +470,7 @@ const NAV = {
   vendedor: [
     {id:'venta', label:'Nueva venta'},
     {id:'especiales', label:'Viajes especiales'},
+    {id:'monitoreo', label:'Monitoreo en vivo'},
     {id:'agenda', label:'Agenda'},
     {id:'buscar', label:'Buscar / cobrar'},
   ],
@@ -457,6 +524,8 @@ async function afterLogin(){
 }
 
 async function doLogout(){
+  stopGpsTracking();
+  if(monitoreoChannel){ sb.removeChannel(monitoreoChannel); monitoreoChannel = null; }
   await sb.auth.signOut();
   location.reload();
 }
@@ -482,6 +551,8 @@ async function goToView(id){
   if(btn) btn.classList.add('active');
 
   if(id==='dashboard') await loadDashboard();
+  if(id==='monitoreo') await loadMonitoreo();
+  if(id==='historial') await loadHistorial();
   if(id==='rutas') await loadRutas();
   if(id==='negocio') await loadNegocioForm();
   if(id==='usuarios') await loadUsuarios();
@@ -950,23 +1021,39 @@ async function showTicketForSpecial(id){
 }
 function closeTicketModal(){ document.getElementById('ticketModal').classList.remove('active'); }
 
-// ===================== CHOFER: CHECK-IN / CHECK-OUT =====================
+// ===================== CHOFER: CHECK-IN / CHECK-OUT + GPS =====================
+let gpsWatchId = null;
+let gpsCurrentCheckinId = null;
+let gpsLastSentAt = 0;
+
 async function getActiveCheckin(){
   const { data } = await sb.from('driver_checkins').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))')
-    .eq('driver_id', currentUser.id).eq('status','checked_in').order('created_at',{ascending:false}).limit(1);
+    .eq('driver_id', currentUser.id).in('status',['pending','approved']).order('created_at',{ascending:false}).limit(1);
   return (data && data[0]) || null;
 }
 async function loadCheckin(){
   const active = await getActiveCheckin();
   const box = document.getElementById('checkinActiveBox');
-  if(active){
+
+  if(active && active.status === 'pending'){
+    stopGpsTracking();
+    box.innerHTML = `<h3>Solicitud enviada</h3>
+      <p>${active.trip_instances.routes.origin} → ${active.trip_instances.routes.destination}<br>
+      ${fmtDate(active.trip_instances.trip_date)} · ${fmtTime(active.trip_instances.departure_time)}<br>
+      Solicitado: ${new Date(active.requested_at).toLocaleTimeString('es-MX')}</p>
+      <p class="tag">Esperando aprobación de un administrador o vendedor...</p>
+      <button class="btn btn-outline btn-sm" onclick="cancelarSolicitud('${active.id}')">Cancelar solicitud</button>`;
+  } else if(active && active.status === 'approved'){
     box.innerHTML = `<h3>Turno activo</h3>
       <p>${active.trip_instances.routes.origin} → ${active.trip_instances.routes.destination}<br>
       ${fmtDate(active.trip_instances.trip_date)} · ${fmtTime(active.trip_instances.departure_time)}<br>
-      Check-in: ${new Date(active.check_in_at).toLocaleTimeString('es-MX')}</p>
-      <button class="btn btn-danger" onclick="hacerCheckout('${active.id}')">Hacer check-out</button>`;
+      Salida aprobada: ${new Date(active.approved_at).toLocaleTimeString('es-MX')}</p>
+      <div class="gpsStatus" id="gpsStatusLine"><span class="liveDot"></span> Compartiendo ubicación en vivo...</div>
+      <div style="margin-top:12px"><button class="btn btn-danger" onclick="hacerCheckout('${active.id}')">Hacer check-out</button></div>`;
+    startGpsTracking(active.id, active.trip_instance_id);
   } else {
-    box.innerHTML = `<h3>Sin turno activo</h3><p class="tag">Selecciona una salida de la lista para iniciar tu check-in.</p>`;
+    stopGpsTracking();
+    box.innerHTML = `<h3>Sin turno activo</h3><p class="tag">Selecciona una salida de la lista para solicitar tu check-in.</p>`;
   }
 
   const today = todayStr();
@@ -977,23 +1064,59 @@ async function loadCheckin(){
     const tr = document.createElement('tr');
     const disabled = active ? 'disabled' : '';
     tr.innerHTML = `<td>${t.routes.origin} → ${t.routes.destination}</td><td>${fmtTime(t.departure_time)}</td><td>${t.seats_booked}/${t.total_seats}</td>
-      <td><button class="btn btn-primary btn-sm" ${disabled} onclick="hacerCheckin('${t.id}')">Check-in</button></td>`;
+      <td><button class="btn btn-primary btn-sm" ${disabled} onclick="hacerCheckin('${t.id}')">Solicitar salida</button></td>`;
     tbody.appendChild(tr);
   });
 }
 async function hacerCheckin(tripId){
-  const { error } = await sb.from('driver_checkins').insert({ driver_id: currentUser.id, trip_instance_id: tripId, check_in_at: new Date().toISOString(), status:'checked_in' });
+  const { error } = await sb.from('driver_checkins').insert({ driver_id: currentUser.id, trip_instance_id: tripId, status:'pending' });
   if(error){ alert(error.message); return; }
   await loadCheckin();
 }
-async function hacerCheckout(checkinId){
-  await sb.from('driver_checkins').update({ check_out_at: new Date().toISOString(), status:'checked_out' }).eq('id', checkinId);
+async function cancelarSolicitud(id){
+  if(!confirm('¿Cancelar esta solicitud de salida?')) return;
+  await sb.from('driver_checkins').delete().eq('id', id);
   await loadCheckin();
+}
+async function hacerCheckout(checkinId){
+  stopGpsTracking();
+  const { error } = await sb.rpc('complete_checkout', { p_checkin_id: checkinId });
+  if(error){ alert(error.message); }
+  await loadCheckin();
+}
+function startGpsTracking(checkinId, tripInstanceId){
+  if(gpsWatchId !== null && gpsCurrentCheckinId === checkinId) return; // ya está activo
+  stopGpsTracking();
+  if(!navigator.geolocation){
+    const el = document.getElementById('gpsStatusLine');
+    if(el) el.textContent = 'Este dispositivo no soporta GPS.';
+    return;
+  }
+  gpsCurrentCheckinId = checkinId;
+  gpsWatchId = navigator.geolocation.watchPosition(async (pos)=>{
+    const now = Date.now();
+    if(now - gpsLastSentAt < 12000) return; // limitar a ~1 envío cada 12s
+    gpsLastSentAt = now;
+    const { latitude, longitude, speed, heading, accuracy } = pos.coords;
+    await sb.from('driver_locations').insert({
+      checkin_id: checkinId, driver_id: currentUser.id, trip_instance_id: tripInstanceId,
+      latitude, longitude, speed_kmh: speed ? Math.round(speed*3.6) : null, heading, accuracy_m: accuracy
+    });
+    const el = document.getElementById('gpsStatusLine');
+    if(el) el.innerHTML = `<span class="liveDot"></span> Última ubicación enviada: ${new Date().toLocaleTimeString('es-MX')}`;
+  }, (err)=>{
+    const el = document.getElementById('gpsStatusLine');
+    if(el) el.textContent = 'No se pudo acceder al GPS: ' + err.message + '. Activa la ubicación del dispositivo.';
+  }, { enableHighAccuracy:true, maximumAge:5000, timeout:20000 });
+}
+function stopGpsTracking(){
+  if(gpsWatchId !== null){ navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
+  gpsCurrentCheckinId = null;
 }
 async function loadPasajeros(){
   const active = await getActiveCheckin();
   const box = document.getElementById('pasajerosBox');
-  if(!active){ box.innerHTML = '<p class="tag">No tienes un turno activo. Haz check-in primero.</p>'; return; }
+  if(!active || active.status !== 'approved'){ box.innerHTML = '<p class="tag">No tienes un turno activo aprobado. Solicita y espera aprobación primero.</p>'; return; }
   const { data: bookings } = await sb.from('bookings').select('*').eq('trip_instance_id', active.trip_instance_id).eq('payment_status','paid').order('passenger_name');
   let html = `<h3>${active.trip_instances.routes.origin} → ${active.trip_instances.routes.destination} · ${fmtTime(active.trip_instances.departure_time)}</h3>`;
   html += `<div class="tableWrap"><table><thead><tr><th>Pasajero</th><th>Teléfono</th><th>Lugar de abordaje</th></tr></thead><tbody>`;
@@ -1003,12 +1126,189 @@ async function loadPasajeros(){
   box.innerHTML = html;
 }
 
+// ===================== ADMIN/VENDEDOR: MONITOREO EN VIVO =====================
+let liveMap = null;
+let mapMarkers = {};
+let monitoreoChannel = null;
+
+async function loadMonitoreo(){
+  await refreshPendingList();
+  await refreshActiveTrips();
+  ensureMonitoreoRealtime();
+}
+async function refreshPendingList(){
+  const { data } = await sb.from('driver_checkins')
+    .select('*, profiles!driver_checkins_driver_id_fkey(full_name), trip_instances(trip_date,departure_time,routes(origin,destination))')
+    .eq('status','pending').order('requested_at');
+  const wrap = document.getElementById('pendingList');
+  document.getElementById('pendingCount').textContent = data && data.length ? `(${data.length})` : '';
+  if(!data || !data.length){ wrap.innerHTML = '<p class="tag">No hay solicitudes pendientes.</p>'; return; }
+  wrap.innerHTML = '';
+  data.forEach(c=>{
+    const div = document.createElement('div');
+    div.className = 'pendingCard';
+    div.innerHTML = `<div class="info"><b>${c.profiles.full_name}</b>${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination} · ${fmtDate(c.trip_instances.trip_date)} ${fmtTime(c.trip_instances.departure_time)}<br>
+      <span class="tag">Solicitado ${new Date(c.requested_at).toLocaleTimeString('es-MX')}</span></div>
+      <div><button class="btn btn-ok btn-sm" onclick="approveCheckin('${c.id}')">Aprobar salida</button> <button class="btn btn-danger btn-sm" onclick="rejectCheckin('${c.id}')">Rechazar</button></div>`;
+    wrap.appendChild(div);
+  });
+}
+async function refreshActiveTrips(){
+  const { data } = await sb.from('driver_checkins')
+    .select('*, profiles!driver_checkins_driver_id_fkey(full_name), trip_instances(trip_date,departure_time,routes(origin,destination))')
+    .eq('status','approved').order('approved_at',{ascending:false});
+  const wrap = document.getElementById('activeTripsList');
+  document.getElementById('activeTripsCount').textContent = data && data.length ? `(${data.length})` : '';
+  if(!data || !data.length){
+    wrap.innerHTML = '<p class="tag">No hay viajes en curso.</p>';
+    if(liveMap) clearMapMarkers();
+    return;
+  }
+  wrap.innerHTML = '';
+  for(const c of data){
+    const div = document.createElement('div');
+    div.className = 'tripCard';
+    div.innerHTML = `<div class="info"><span class="liveDot"></span><b>${c.profiles.full_name}</b> — ${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination}<br>
+      <span class="tag">Salió ${new Date(c.approved_at).toLocaleTimeString('es-MX')}</span></div>
+      <div><button class="btn btn-outline btn-sm" onclick="hacerCheckoutAdmin('${c.id}')">Marcar llegada</button></div>`;
+    wrap.appendChild(div);
+  }
+  await updateMapForActiveTrips(data);
+}
+async function hacerCheckoutAdmin(checkinId){
+  if(!confirm('¿Marcar esta unidad como llegada / fin de ruta?')) return;
+  const { error } = await sb.rpc('complete_checkout', { p_checkin_id: checkinId });
+  if(error){ alert(error.message); }
+  await loadMonitoreo();
+}
+async function approveCheckin(id){
+  const { error } = await sb.from('driver_checkins').update({ status:'approved', approved_by: currentUser.id, approved_at: new Date().toISOString() }).eq('id', id);
+  if(error){ alert(error.message); return; }
+  await loadMonitoreo();
+}
+async function rejectCheckin(id){
+  const reason = prompt('Motivo del rechazo (opcional):') || null;
+  const { error } = await sb.from('driver_checkins').update({ status:'rejected', rejected_by: currentUser.id, rejected_at: new Date().toISOString(), rejected_reason: reason }).eq('id', id);
+  if(error){ alert(error.message); return; }
+  await loadMonitoreo();
+}
+function ensureLiveMap(){
+  if(liveMap) { setTimeout(()=>liveMap.invalidateSize(), 100); return; }
+  liveMap = L.map('liveMap', { zoomControl:true }).setView([23.6, -100.5], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap', maxZoom: 18
+  }).addTo(liveMap);
+  setTimeout(()=>liveMap.invalidateSize(), 150);
+}
+function clearMapMarkers(){
+  Object.values(mapMarkers).forEach(m=>liveMap && liveMap.removeLayer(m));
+  mapMarkers = {};
+}
+async function updateMapForActiveTrips(checkins){
+  ensureLiveMap();
+  const seen = new Set();
+  const bounds = [];
+  for(const c of checkins){
+    const { data: locs } = await sb.from('driver_locations').select('*').eq('checkin_id', c.id).order('recorded_at',{ascending:false}).limit(1);
+    if(!locs || !locs.length) continue;
+    const loc = locs[0];
+    seen.add(c.id);
+    const label = `${c.profiles.full_name} · ${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination}<br><span style="font-size:11px;color:#666">Actualizado ${new Date(loc.recorded_at).toLocaleTimeString('es-MX')}</span>`;
+    if(mapMarkers[c.id]){
+      mapMarkers[c.id].setLatLng([loc.latitude, loc.longitude]);
+      mapMarkers[c.id].setPopupContent(label);
+    } else {
+      mapMarkers[c.id] = L.marker([loc.latitude, loc.longitude]).addTo(liveMap).bindPopup(label);
+    }
+    bounds.push([loc.latitude, loc.longitude]);
+  }
+  Object.keys(mapMarkers).forEach(id=>{ if(!seen.has(id)){ liveMap.removeLayer(mapMarkers[id]); delete mapMarkers[id]; } });
+  if(bounds.length === 1) liveMap.setView(bounds[0], 13);
+  else if(bounds.length > 1) liveMap.fitBounds(bounds, { padding:[30,30] });
+  document.getElementById('mapUpdatedAt').textContent = 'actualizado ' + new Date().toLocaleTimeString('es-MX');
+}
+function ensureMonitoreoRealtime(){
+  if(monitoreoChannel) return;
+  monitoreoChannel = sb.channel('monitoreo-live')
+    .on('postgres_changes', { event:'*', schema:'public', table:'driver_checkins' }, ()=>{ refreshPendingList(); refreshActiveTrips(); })
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'driver_locations' }, ()=>{ refreshActiveTrips(); })
+    .subscribe();
+}
+
+// ===================== ADMIN: HISTORIAL Y ESTADÍSTICAS =====================
+let chartIngresos = null;
+let chartRutas = null;
+async function loadHistorial(){
+  const desdeEl = document.getElementById('histDesde');
+  const hastaEl = document.getElementById('histHasta');
+  if(!desdeEl.value){ const d=new Date(); d.setDate(d.getDate()-30); desdeEl.value = d.toISOString().slice(0,10); }
+  if(!hastaEl.value){ hastaEl.value = todayStr(); }
+  const desde = desdeEl.value, hasta = hastaEl.value;
+
+  const { data: bookings } = await sb.from('bookings').select('price,payment_status,created_at, trip_instances(trip_date, routes(origin,destination))').gte('created_at', desde+'T00:00:00').lte('created_at', hasta+'T23:59:59');
+  const { data: specials } = await sb.from('special_trips').select('price,payment_status,created_at,origin,destination').gte('created_at', desde+'T00:00:00').lte('created_at', hasta+'T23:59:59');
+  const all = [...(bookings||[]).map(b=>({...b, ruta: b.trip_instances ? (b.trip_instances.routes.origin+' → '+b.trip_instances.routes.destination) : 'Especial'})), ...(specials||[]).map(s=>({...s, ruta: s.origin+' → '+s.destination}))];
+
+  const ventas = all.length;
+  const ingresos = all.filter(x=>x.payment_status==='paid').reduce((a,b)=>a+Number(b.price||0),0);
+
+  const { data: trips } = await sb.from('trip_instances').select('total_seats,seats_booked,status').gte('trip_date', desde).lte('trip_date', hasta);
+  const completadas = (trips||[]).filter(t=>t.status==='completed').length;
+  const ocupacionProm = (trips && trips.length) ? Math.round((trips.reduce((a,t)=>a+(t.seats_booked/t.total_seats),0)/trips.length)*100) : 0;
+
+  document.getElementById('hist-ventas').textContent = ventas;
+  document.getElementById('hist-ingresos').textContent = money(ingresos);
+  document.getElementById('hist-completadas').textContent = completadas;
+  document.getElementById('hist-ocupacion').textContent = ocupacionProm + '%';
+
+  // Ingresos por día
+  const porDia = {};
+  all.filter(x=>x.payment_status==='paid').forEach(x=>{ const d = x.created_at.slice(0,10); porDia[d] = (porDia[d]||0) + Number(x.price||0); });
+  const diasOrdenados = Object.keys(porDia).sort();
+  const ctxIng = document.getElementById('chartIngresos').getContext('2d');
+  if(chartIngresos) chartIngresos.destroy();
+  chartIngresos = new Chart(ctxIng, {
+    type:'line',
+    data:{ labels: diasOrdenados.map(d=>fmtDate(d)), datasets:[{ label:'Ingresos', data: diasOrdenados.map(d=>porDia[d]), borderColor:'#2f8fff', backgroundColor:'rgba(47,143,255,.15)', tension:.3, fill:true }] },
+    options:{ plugins:{ legend:{display:false} }, scales:{ x:{ ticks:{color:'#8ea0c4'}, grid:{color:'#233150'} }, y:{ ticks:{color:'#8ea0c4'}, grid:{color:'#233150'} } } }
+  });
+
+  // Ventas por ruta
+  const porRuta = {};
+  all.forEach(x=>{ porRuta[x.ruta] = (porRuta[x.ruta]||0) + 1; });
+  const rutasOrdenadas = Object.keys(porRuta).sort((a,b)=>porRuta[b]-porRuta[a]);
+  const ctxRuta = document.getElementById('chartRutas').getContext('2d');
+  if(chartRutas) chartRutas.destroy();
+  chartRutas = new Chart(ctxRuta, {
+    type:'bar',
+    data:{ labels: rutasOrdenadas, datasets:[{ label:'Ventas', data: rutasOrdenadas.map(r=>porRuta[r]), backgroundColor:'#22d3c5' }] },
+    options:{ plugins:{ legend:{display:false} }, scales:{ x:{ ticks:{color:'#8ea0c4'}, grid:{display:false} }, y:{ ticks:{color:'#8ea0c4'}, grid:{color:'#233150'} } } }
+  });
+
+  // Historial de check-ins
+  const { data: checkins } = await sb.from('driver_checkins')
+    .select('*, profiles!driver_checkins_driver_id_fkey(full_name), trip_instances(trip_date,routes(origin,destination))')
+    .gte('created_at', desde+'T00:00:00').lte('created_at', hasta+'T23:59:59')
+    .order('created_at',{ascending:false}).limit(200);
+  const tbody = document.querySelector('#tblHistCheckins tbody');
+  tbody.innerHTML = '';
+  (checkins||[]).forEach(c=>{
+    const tr = document.createElement('tr');
+    const salidaLlegada = (c.approved_at ? new Date(c.approved_at).toLocaleTimeString('es-MX') : '—') + ' → ' + (c.check_out_at ? new Date(c.check_out_at).toLocaleTimeString('es-MX') : '—');
+    tr.innerHTML = `<td>${c.profiles.full_name}</td><td>${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination}</td><td>${fmtDate(c.trip_instances.trip_date)}</td>
+      <td>${new Date(c.requested_at).toLocaleTimeString('es-MX')}</td><td>${c.approved_at ? new Date(c.approved_at).toLocaleTimeString('es-MX') : '—'}</td>
+      <td>${salidaLlegada}</td><td><span class="badge ${c.status==='checked_out'?'paid':(c.status==='rejected'?'cancelled':'pending')}">${c.status}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
 // ===================== INIT =====================
 (async function init(){
   const { data: { session } } = await sb.auth.getSession();
   if(session){ await afterLogin(); }
   document.getElementById('loginPassword').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 })();
+
 </script>
 </body>
 </html>
