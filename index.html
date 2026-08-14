@@ -146,6 +146,26 @@ tr:last-child td{border-bottom:none}
 .chartWrap{position:relative;height:260px}
 .kpiRow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
 .gpsStatus{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:8px}
+
+/* ---------- Mapa de asientos ---------- */
+.seatMapWrap{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;margin:14px 0}
+.seatMap{display:flex;flex-direction:column;gap:8px}
+.seatMap .driverRow{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.seatRow{display:flex;gap:8px;align-items:center}
+.seatRow .aisle{width:16px}
+.seatBtn{width:40px;height:40px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.seatBtn:hover:not(:disabled){border-color:var(--brand)}
+.seatBtn.taken{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35);color:#fca5a5;cursor:not-allowed}
+.seatBtn.selected{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#04101f;border-color:transparent}
+.seatLegend{display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--muted);min-width:160px}
+.seatLegend .item{display:flex;align-items:center;gap:8px}
+.legendDot{width:16px;height:16px;border-radius:5px;display:inline-block;border:1px solid var(--border)}
+.legendDot.free{background:var(--panel2)}
+.legendDot.taken{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35)}
+.legendDot.selected{background:linear-gradient(135deg,var(--brand),var(--brand2));border-color:transparent}
+.capacityBtns{display:flex;gap:6px}
+.capBtn{padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer}
+.capBtn:hover{border-color:var(--brand)}
 </style>
 </head>
 <body>
@@ -313,6 +333,7 @@ tr:last-child td{border-bottom:none}
           <div class="field"><label>Salida</label><select id="ventaSalida"></select></div>
         </div>
         <div id="ventaSeatInfo" class="tag" style="margin:10px 0"></div>
+        <div id="ventaSeatMapWrap"></div>
         <hr style="border-color:var(--border);margin:16px 0">
         <div class="formRow">
           <div class="field"><label>Nombre del pasajero</label><input id="ventaNombre"></div>
@@ -372,14 +393,14 @@ tr:last-child td{border-bottom:none}
 
     <!-- ============ VENDEDOR/ADMIN: BUSCAR / COBRAR ============ -->
     <div class="view" id="view-buscar">
-      <div class="pageTitle">Buscar reservas</div>
-      <div class="pageSub">Confirma pagos y genera tickets digitales</div>
+      <div class="pageTitle">Cobrar apartados</div>
+      <div class="pageSub">Los apartados pendientes de pago aparecen aquí automáticamente — también puedes buscar por folio, nombre o teléfono</div>
       <div class="sectionCard">
         <div class="toolbar">
           <div class="field"><label>Folio, nombre o teléfono</label><input id="buscarQ" placeholder="Buscar..."></div>
           <button class="btn btn-primary" onclick="buscarReservas()">Buscar</button>
         </div>
-        <div class="tableWrap"><table id="tblBuscar"><thead><tr><th>Folio</th><th>Tipo</th><th>Pasajero</th><th>Fecha</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+        <div class="tableWrap"><table id="tblBuscar"><thead><tr><th>Folio</th><th>Tipo</th><th>Pasajero</th><th>Asiento</th><th>Fecha</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
       </div>
     </div>
 
@@ -560,7 +581,7 @@ async function goToView(id){
   if(id==='venta') await loadVentaForm();
   if(id==='especiales') await loadEspeciales();
   if(id==='agenda') await cargarAgenda();
-  if(id==='buscar') { /* espera búsqueda */ }
+  if(id==='buscar') await loadPendientesCobro();
   if(id==='checkin') await loadCheckin();
   if(id==='pasajeros') await loadPasajeros();
 }
@@ -655,7 +676,14 @@ async function loadRutas(){
       <div class="formRow" style="margin-top:14px">
         <div class="field" style="max-width:120px"><label>Hora</label><input type="time" id="newTime-${route.id}"></div>
         <div class="field" style="max-width:110px"><label>Precio</label><input type="number" id="newPrice-${route.id}" step="0.01"></div>
-        <div class="field" style="max-width:90px"><label>Asientos</label><input type="number" id="newSeats-${route.id}" value="18"></div>
+        <div class="field" style="max-width:110px">
+          <label>Asientos (unidad)</label>
+          <input type="number" id="newSeats-${route.id}" value="13">
+          <div class="capacityBtns" style="margin-top:6px">
+            <button type="button" class="capBtn" onclick="document.getElementById('newSeats-${route.id}').value=7">7 pax</button>
+            <button type="button" class="capBtn" onclick="document.getElementById('newSeats-${route.id}').value=13">13 pax</button>
+          </div>
+        </div>
         <button class="btn btn-outline" onclick="addSchedule('${route.id}')">+ Agregar horario</button>
       </div>`;
     container.appendChild(card);
@@ -664,7 +692,7 @@ async function loadRutas(){
 async function addSchedule(routeId){
   const time = document.getElementById('newTime-'+routeId).value;
   const price = document.getElementById('newPrice-'+routeId).value || 0;
-  const seats = document.getElementById('newSeats-'+routeId).value || 18;
+  const seats = document.getElementById('newSeats-'+routeId).value || 13;
   if(!time){ alert('Indica una hora de salida.'); return; }
   const { error } = await sb.from('route_schedules').insert({ route_id: routeId, departure_time: time, default_price: price, default_seats: seats });
   if(error){ alert(error.message); return; }
@@ -825,7 +853,11 @@ function exportarCSV(){
   const a = document.createElement('a'); a.href = url; a.download = 'reporte_viajesapp_'+todayStr()+'.csv'; a.click();
 }
 
-// ===================== VENTA (rutas fijas) =====================
+// ===================== VENTA (rutas fijas) + MAPA DE ASIENTOS =====================
+let ventaSelectedSeat = null;
+let ventaTakenSeats = [];
+let ventaTotalSeats = 0;
+
 async function loadVentaForm(){
   const { data: routes } = await sb.from('routes').select('*').eq('active',true).order('code');
   const sel = document.getElementById('ventaRuta');
@@ -839,19 +871,73 @@ async function cargarSalidasParaVenta(){
   if(!routeId || !fecha) return;
   const { data: trips } = await sb.from('trip_instances').select('*').eq('route_id', routeId).eq('trip_date', fecha).order('departure_time');
   const sel = document.getElementById('ventaSalida');
-  sel.innerHTML = (trips||[]).map(t=>`<option value="${t.id}" data-price="${t.price}" data-seats="${t.total_seats-t.seats_booked}">${fmtTime(t.departure_time)} — ${t.total_seats-t.seats_booked}/${t.total_seats} disponibles</option>`).join('');
-  updateVentaSeatInfo();
+  sel.innerHTML = (trips||[]).map(t=>`<option value="${t.id}" data-price="${t.price}" data-total="${t.total_seats}">${fmtTime(t.departure_time)} — ${t.total_seats-t.seats_booked}/${t.total_seats} disponibles</option>`).join('');
   sel.onchange = updateVentaSeatInfo;
+  await updateVentaSeatInfo();
 }
-function updateVentaSeatInfo(){
+async function updateVentaSeatInfo(){
   const sel = document.getElementById('ventaSalida');
   const opt = sel.options[sel.selectedIndex];
   const info = document.getElementById('ventaSeatInfo');
-  if(!opt){ info.textContent = 'No hay salidas para esta fecha. Ve a Rutas y precios para generarlas.'; return; }
-  const seats = opt.getAttribute('data-seats');
+  const mapWrap = document.getElementById('ventaSeatMapWrap');
+  ventaSelectedSeat = null;
+  if(!opt){
+    info.textContent = 'No hay salidas para esta fecha. Ve a Rutas y precios para generarlas.';
+    mapWrap.innerHTML = '';
+    return;
+  }
+  const tripId = opt.value;
   const price = opt.getAttribute('data-price');
-  info.textContent = seats + ' asientos disponibles · precio sugerido ' + money(price);
+  ventaTotalSeats = parseInt(opt.getAttribute('data-total'));
   document.getElementById('ventaPrecio').value = price;
+
+  const { data: taken } = await sb.from('bookings').select('seat_number').eq('trip_instance_id', tripId).neq('payment_status','cancelled').not('seat_number','is',null);
+  ventaTakenSeats = (taken||[]).map(b=>b.seat_number);
+  info.textContent = (ventaTotalSeats - ventaTakenSeats.length) + ' asientos disponibles de ' + ventaTotalSeats + ' · precio sugerido ' + money(price);
+  renderVentaSeatMap();
+}
+function renderVentaSeatMap(){
+  document.getElementById('ventaSeatMapWrap').innerHTML = `
+    <div class="seatMapWrap">
+      ${seatMapHtml(ventaTotalSeats, ventaTakenSeats, ventaSelectedSeat, 'selectVentaSeat')}
+      <div class="seatLegend">
+        <div class="item"><span class="legendDot free"></span> Disponible</div>
+        <div class="item"><span class="legendDot taken"></span> Ocupado</div>
+        <div class="item"><span class="legendDot selected"></span> Tu selección</div>
+        <div class="tag" style="margin-top:6px">Unidad de ${ventaTotalSeats} pasajeros</div>
+      </div>
+    </div>`;
+}
+function selectVentaSeat(n){
+  if(ventaTakenSeats.includes(n)) return;
+  ventaSelectedSeat = (ventaSelectedSeat === n) ? null : n;
+  renderVentaSeatMap();
+}
+// Genera un croquis visual de asientos (2 a la izquierda + pasillo + 1 a la derecha), común en vans/combis
+function seatMapHtml(total, taken, selected, onclickFn){
+  if(!total) return '<p class="tag">Selecciona una salida para ver los asientos.</p>';
+  let rows = []; let n = 1;
+  while(n <= total){
+    const left = []; for(let k=0;k<2 && n<=total;k++){ left.push(n); n++; }
+    const right = []; if(n<=total){ right.push(n); n++; }
+    rows.push({left, right});
+  }
+  let html = '<div class="seatMap"><div class="driverRow">🚐 Conductor</div>';
+  rows.forEach(row=>{
+    html += '<div class="seatRow">';
+    row.left.forEach(s=> html += seatBtnHtml(s, taken, selected, onclickFn));
+    html += '<div class="aisle"></div>';
+    row.right.forEach(s=> html += seatBtnHtml(s, taken, selected, onclickFn));
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+function seatBtnHtml(s, taken, selected, onclickFn){
+  const isTaken = taken.includes(s);
+  const isSelected = s === selected;
+  const cls = isTaken ? 'seatBtn taken' : (isSelected ? 'seatBtn selected' : 'seatBtn');
+  return `<button type="button" class="${cls}" ${isTaken?'disabled':''} onclick="${onclickFn}(${s})">${s}</button>`;
 }
 async function crearApartado(){ await guardarVenta(false); }
 async function crearVentaPagada(){ await guardarVenta(true); }
@@ -864,20 +950,27 @@ async function guardarVenta(pagado){
   const abordaje = document.getElementById('ventaAbordaje').value.trim();
   const precio = document.getElementById('ventaPrecio').value;
   if(!tripId || !nombre || !telefono){ msg.textContent = 'Completa ruta, salida, nombre y teléfono.'; return; }
+  if(!ventaSelectedSeat){ msg.textContent = 'Selecciona un asiento en el mapa.'; return; }
 
   const payload = {
     trip_instance_id: tripId, passenger_name: nombre, passenger_phone: telefono,
     passenger_email: correo||null, boarding_point: abordaje||null, price: precio||0,
+    seat_number: ventaSelectedSeat,
     payment_status: pagado ? 'paid' : 'pending', sold_by: currentUser.id,
     paid_at: pagado ? new Date().toISOString() : null,
   };
   const { data, error } = await sb.from('bookings').insert(payload).select().single();
-  if(error){ msg.textContent = error.message; return; }
+  if(error){
+    msg.textContent = error.code === '23505' ? 'Ese asiento ya fue tomado, elige otro.' : error.message;
+    await updateVentaSeatInfo();
+    return;
+  }
   ['ventaNombre','ventaTelefono','ventaCorreo','ventaAbordaje'].forEach(id=>document.getElementById(id).value='');
   await cargarSalidasParaVenta();
   if(pagado){ await showTicketForBooking(data.id); }
-  else { msg.style.color = '#86efac'; msg.textContent = 'Apartado creado: ' + data.folio; }
+  else { msg.style.color = '#86efac'; msg.textContent = 'Apartado creado: ' + data.folio + ' · asiento ' + payload.seat_number; }
 }
+
 
 // ===================== VIAJES ESPECIALES =====================
 async function loadEspeciales(){
@@ -919,7 +1012,8 @@ async function crearEspecial(pagado){
 }
 async function marcarPagadoEspecial(id){
   await sb.from('special_trips').update({ payment_status:'paid', paid_at: new Date().toISOString() }).eq('id', id);
-  await loadEspeciales();
+  if(document.getElementById('view-especiales').classList.contains('active')) await loadEspeciales();
+  if(document.getElementById('view-buscar').classList.contains('active')) await refreshBuscarView();
   await showTicketForSpecial(id);
 }
 
@@ -940,43 +1034,63 @@ async function cargarAgenda(){
 }
 
 // ===================== BUSCAR / COBRAR =====================
+let buscarLastMode = 'pendientes';
+let buscarLastQuery = '';
+
+async function loadPendientesCobro(){
+  buscarLastMode = 'pendientes';
+  const { data: bookings } = await sb.from('bookings').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))').eq('payment_status','pending').order('created_at',{ascending:false}).limit(50);
+  const { data: specials } = await sb.from('special_trips').select('*').eq('payment_status','pending').order('created_at',{ascending:false}).limit(50);
+  renderBuscarResults(bookings, specials, true);
+}
 async function buscarReservas(){
   const q = document.getElementById('buscarQ').value.trim();
-  if(!q){ return; }
+  if(!q){ await loadPendientesCobro(); return; }
+  buscarLastMode = 'query'; buscarLastQuery = q;
   const { data: bookings } = await sb.from('bookings').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))')
     .or(`folio.ilike.%${q}%,passenger_name.ilike.%${q}%,passenger_phone.ilike.%${q}%`).limit(30);
   const { data: specials } = await sb.from('special_trips').select('*')
     .or(`folio.ilike.%${q}%,client_name.ilike.%${q}%,client_phone.ilike.%${q}%`).limit(30);
-
+  renderBuscarResults(bookings, specials, false);
+}
+async function refreshBuscarView(){
+  if(buscarLastMode === 'query' && buscarLastQuery) await buscarReservas();
+  else await loadPendientesCobro();
+}
+function renderBuscarResults(bookings, specials, isPendientesView){
   const tbody = document.querySelector('#tblBuscar tbody');
   tbody.innerHTML = '';
+  if((!bookings || !bookings.length) && (!specials || !specials.length)){
+    tbody.innerHTML = `<tr><td colspan="8" class="tag">${isPendientesView ? 'No hay apartados pendientes de pago en este momento.' : 'Sin resultados.'}</td></tr>`;
+    return;
+  }
   (bookings||[]).forEach(b=>{
     const tr = document.createElement('tr');
     const fecha = b.trip_instances ? fmtDate(b.trip_instances.trip_date)+' '+fmtTime(b.trip_instances.departure_time) : '—';
-    tr.innerHTML = `<td>${b.folio}</td><td>Ruta fija</td><td>${b.passenger_name}</td><td>${fecha}</td><td>${money(b.price)}</td><td><span class="badge ${b.payment_status}">${b.payment_status}</span></td>
+    tr.innerHTML = `<td>${b.folio}</td><td>Ruta fija</td><td>${b.passenger_name}</td><td>${b.seat_number||'—'}</td><td>${fecha}</td><td>${money(b.price)}</td><td><span class="badge ${b.payment_status}">${b.payment_status}</span></td>
       <td>${b.payment_status!=='paid'?`<button class="btn btn-ok btn-sm" onclick="marcarPagadoBooking('${b.id}')">Cobrar</button>`:''} <button class="btn btn-outline btn-sm" onclick="showTicketForBooking('${b.id}')">Ticket</button> ${b.payment_status!=='cancelled'?`<button class="btn btn-danger btn-sm" onclick="cancelarBooking('${b.id}')">Cancelar</button>`:''}</td>`;
     tbody.appendChild(tr);
   });
   (specials||[]).forEach(s=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${s.folio}</td><td>Especial</td><td>${s.client_name}</td><td>${fmtDate(s.trip_date)} ${fmtTime(s.trip_time)}</td><td>${money(s.price)}</td><td><span class="badge ${s.payment_status}">${s.payment_status}</span></td>
+    tr.innerHTML = `<td>${s.folio}</td><td>Especial</td><td>${s.client_name}</td><td>—</td><td>${fmtDate(s.trip_date)} ${fmtTime(s.trip_time)}</td><td>${money(s.price)}</td><td><span class="badge ${s.payment_status}">${s.payment_status}</span></td>
       <td>${s.payment_status!=='paid'?`<button class="btn btn-ok btn-sm" onclick="marcarPagadoEspecial('${s.id}')">Cobrar</button>`:''} <button class="btn btn-outline btn-sm" onclick="showTicketForSpecial('${s.id}')">Ticket</button></td>`;
     tbody.appendChild(tr);
   });
 }
 async function marcarPagadoBooking(id){
   await sb.from('bookings').update({ payment_status:'paid', paid_at: new Date().toISOString() }).eq('id', id);
-  await buscarReservas();
+  await refreshBuscarView();
   await showTicketForBooking(id);
 }
 async function cancelarBooking(id){
   if(!confirm('¿Cancelar esta reserva?')) return;
   await sb.from('bookings').update({ payment_status:'cancelled' }).eq('id', id);
-  await buscarReservas();
+  await refreshBuscarView();
 }
 
 // ===================== TICKETS =====================
-function ticketHtml({folio, ruta, fecha, hora, pasajero, telefono, precio}){
+function ticketHtml({folio, ruta, fecha, hora, pasajero, telefono, precio, asiento}){
   const biz = businessSettings || {};
   return `
     <div class="ticket">
@@ -991,6 +1105,7 @@ function ticketHtml({folio, ruta, fecha, hora, pasajero, telefono, precio}){
         <tr><td>Hora</td><td style="text-align:right">${hora}</td></tr>
         <tr><td>Pasajero</td><td style="text-align:right">${pasajero}</td></tr>
         <tr><td>Teléfono</td><td style="text-align:right">${telefono}</td></tr>
+        ${asiento ? `<tr><td>Asiento</td><td style="text-align:right"><b>${asiento}</b></td></tr>` : ''}
         <tr><td>Precio</td><td style="text-align:right"><b>${money(precio)}</b></td></tr>
       </table>
       <hr>
@@ -1005,7 +1120,7 @@ async function showTicketForBooking(id){
   const ruta = b.trip_instances ? (b.trip_instances.routes.origin+' → '+b.trip_instances.routes.destination) : '—';
   document.getElementById('ticketContent').innerHTML = ticketHtml({
     folio:b.folio, ruta, fecha: fmtDate(b.trip_instances?.trip_date), hora: fmtTime(b.trip_instances?.departure_time),
-    pasajero:b.passenger_name, telefono:b.passenger_phone, precio:b.price
+    pasajero:b.passenger_name, telefono:b.passenger_phone, precio:b.price, asiento:b.seat_number
   });
   document.getElementById('ticketModal').classList.add('active');
 }
