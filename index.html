@@ -204,6 +204,26 @@ tr:last-child td{border-bottom:none}
 
   <div class="mainArea">
 
+    <!-- ============ MASTER: EMPRESAS ============ -->
+    <div class="view" id="view-empresas">
+      <div class="pageTitle">Empresas</div>
+      <div class="pageSub">Clientes independientes que usan el sistema, cada uno con su propia línea de transporte</div>
+      <div class="toolbar"><button class="btn btn-primary" onclick="openCompanyModal()">+ Nueva empresa</button></div>
+      <div class="sectionCard">
+        <div class="tableWrap"><table id="tblEmpresas"><thead><tr><th>Empresa</th><th>Usuarios</th><th>Ventas</th><th>Ingresos</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ============ MASTER: SOPORTE / HISTORIAL ============ -->
+    <div class="view" id="view-soporte">
+      <div class="pageTitle">Soporte / Historial por empresa</div>
+      <div class="pageSub">Consulta la operación de cualquier empresa cliente para apoyarla en caso de dudas o incidencias</div>
+      <div class="toolbar">
+        <div class="field" style="min-width:260px"><label>Empresa</label><select id="soporteEmpresa" onchange="loadSoporte()"></select></div>
+      </div>
+      <div id="soporteContent"><p class="tag">Selecciona una empresa para ver su información.</p></div>
+    </div>
+
     <!-- ============ ADMIN: DASHBOARD ============ -->
     <div class="view" id="view-dashboard">
       <div class="pageTitle">Panel general</div>
@@ -466,6 +486,25 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<div class="modalBg" id="companyModal">
+  <div class="modalCard">
+    <h3>Nueva empresa cliente</h3>
+    <div class="field"><label>Nombre de la empresa / línea de transporte</label><input id="ncNombre" placeholder="Ej. Transportes El Águila"></div>
+    <div class="field"><label>Nombre del negocio en tickets (opcional, igual al de arriba si se deja vacío)</label><input id="ncNombreNegocio"></div>
+    <hr style="border-color:var(--border);margin:16px 0">
+    <p class="tag" style="margin-bottom:10px">Usuario administrador inicial de esta empresa:</p>
+    <div class="field"><label>Nombre completo</label><input id="ncAdminNombre"></div>
+    <div class="field"><label>Correo</label><input id="ncAdminEmail" type="email"></div>
+    <div class="field"><label>Contraseña temporal</label><input id="ncAdminPassword" type="text"></div>
+    <div class="field"><label>Teléfono (opcional)</label><input id="ncAdminPhone"></div>
+    <div class="errorMsg" id="ncMsg"></div>
+    <div class="modalActions">
+      <button class="btn btn-outline" onclick="closeCompanyModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="crearEmpresa()">Crear empresa</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ===================== CONFIG =====================
 const SUPABASE_URL = "https://vodbywkwchljubvtraqh.supabase.co";
@@ -478,6 +517,10 @@ let businessSettings = null;
 let resetPwdUserId = null;
 
 const NAV = {
+  master: [
+    {id:'empresas', label:'Empresas'},
+    {id:'soporte', label:'Soporte / Historial'},
+  ],
   admin: [
     {id:'dashboard', label:'Panel general'},
     {id:'monitoreo', label:'Monitoreo en vivo'},
@@ -540,7 +583,7 @@ async function afterLogin(){
   const tag = document.getElementById('userRoleTag');
   tag.textContent = profile.role;
   tag.className = 'roleTag ' + profile.role;
-  await loadBusinessSettings();
+  if(profile.role !== 'master') await loadBusinessSettings();
   goToView(NAV[profile.role][0].id);
 }
 
@@ -571,6 +614,8 @@ async function goToView(id){
   const btn = document.getElementById('nav-'+id);
   if(btn) btn.classList.add('active');
 
+  if(id==='empresas') await loadEmpresas();
+  if(id==='soporte') await loadSoporteEmpresas();
   if(id==='dashboard') await loadDashboard();
   if(id==='monitoreo') await loadMonitoreo();
   if(id==='historial') await loadHistorial();
@@ -1415,6 +1460,121 @@ async function loadHistorial(){
       <td>${salidaLlegada}</td><td><span class="badge ${c.status==='checked_out'?'paid':(c.status==='rejected'?'cancelled':'pending')}">${c.status}</span></td>`;
     tbody.appendChild(tr);
   });
+}
+
+// ===================== MASTER: EMPRESAS =====================
+async function loadEmpresas(){
+  const { data: companies } = await sb.from('companies').select('*').order('created_at',{ascending:false});
+  const tbody = document.querySelector('#tblEmpresas tbody');
+  tbody.innerHTML = '';
+  for(const c of (companies||[])){
+    const { count: userCount } = await sb.from('profiles').select('*',{count:'exact',head:true}).eq('company_id', c.id);
+    const { data: bookings } = await sb.from('bookings').select('price,payment_status').eq('company_id', c.id);
+    const { data: specials } = await sb.from('special_trips').select('price,payment_status').eq('company_id', c.id);
+    const all = [...(bookings||[]), ...(specials||[])];
+    const ventas = all.length;
+    const ingresos = all.filter(x=>x.payment_status==='paid').reduce((a,b)=>a+Number(b.price||0),0);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><b>${c.name}</b></td><td>${userCount||0}</td><td>${ventas}</td><td>${money(ingresos)}</td>
+      <td>${c.active? '<span class="badge paid">Activa</span>' : '<span class="badge cancelled">Inactiva</span>'}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="verSoporteDeEmpresa('${c.id}')">Ver detalle</button>
+        <button class="btn ${c.active?'btn-danger':'btn-ok'} btn-sm" onclick="toggleCompanyActive('${c.id}', ${!c.active})">${c.active?'Desactivar':'Activar'}</button>
+      </td>`;
+    tbody.appendChild(tr);
+  }
+  if(!companies || !companies.length) tbody.innerHTML = '<tr><td colspan="6" class="tag">Aún no hay empresas registradas.</td></tr>';
+}
+async function toggleCompanyActive(id, active){
+  await sb.from('companies').update({ active }).eq('id', id);
+  await loadEmpresas();
+}
+function openCompanyModal(){ document.getElementById('companyModal').classList.add('active'); document.getElementById('ncMsg').textContent=''; }
+function closeCompanyModal(){ document.getElementById('companyModal').classList.remove('active'); }
+async function crearEmpresa(){
+  const msg = document.getElementById('ncMsg'); msg.textContent = '';
+  const payload = {
+    company_name: document.getElementById('ncNombre').value.trim(),
+    business_name: document.getElementById('ncNombreNegocio').value.trim(),
+    admin_full_name: document.getElementById('ncAdminNombre').value.trim(),
+    admin_email: document.getElementById('ncAdminEmail').value.trim(),
+    admin_password: document.getElementById('ncAdminPassword').value,
+    admin_phone: document.getElementById('ncAdminPhone').value.trim(),
+  };
+  if(!payload.company_name || !payload.admin_full_name || !payload.admin_email || !payload.admin_password){
+    msg.textContent = 'Completa todos los campos obligatorios.'; return;
+  }
+  const { data: { session } } = await sb.auth.getSession();
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/master-create-company', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if(!res.ok){ msg.textContent = json.error || 'Error al crear la empresa.'; return; }
+    closeCompanyModal();
+    ['ncNombre','ncNombreNegocio','ncAdminNombre','ncAdminEmail','ncAdminPassword','ncAdminPhone'].forEach(id=>document.getElementById(id).value='');
+    await loadEmpresas();
+  }catch(e){ msg.textContent = 'Error de conexión: ' + e.message; }
+}
+async function verSoporteDeEmpresa(companyId){
+  await goToView('soporte');
+  document.getElementById('soporteEmpresa').value = companyId;
+  await loadSoporte();
+}
+
+// ===================== MASTER: SOPORTE / HISTORIAL =====================
+async function loadSoporteEmpresas(){
+  const { data: companies } = await sb.from('companies').select('*').order('name');
+  const sel = document.getElementById('soporteEmpresa');
+  const prevValue = sel.value;
+  sel.innerHTML = '<option value="">Selecciona una empresa...</option>' + (companies||[]).map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  if(prevValue) sel.value = prevValue;
+}
+async function loadSoporte(){
+  const companyId = document.getElementById('soporteEmpresa').value;
+  const content = document.getElementById('soporteContent');
+  if(!companyId){ content.innerHTML = '<p class="tag">Selecciona una empresa para ver su información.</p>'; return; }
+
+  const { data: settings } = await sb.from('business_settings').select('*').eq('company_id', companyId).maybeSingle();
+  const { data: users } = await sb.from('profiles').select('*').eq('company_id', companyId).order('role');
+  const { data: bookings } = await sb.from('bookings').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))').eq('company_id', companyId).order('created_at',{ascending:false}).limit(30);
+  const { data: specials } = await sb.from('special_trips').select('*').eq('company_id', companyId).order('created_at',{ascending:false}).limit(30);
+  const { data: checkins } = await sb.from('driver_checkins').select('*, profiles!driver_checkins_driver_id_fkey(full_name), trip_instances(trip_date,routes(origin,destination))').eq('company_id', companyId).order('created_at',{ascending:false}).limit(30);
+
+  const allSales = [...(bookings||[]), ...(specials||[])];
+  const ingresos = allSales.filter(x=>x.payment_status==='paid').reduce((a,b)=>a+Number(b.price||0),0);
+  const usersByRole = { admin:0, vendedor:0, chofer:0 };
+  (users||[]).forEach(u=>{ if(usersByRole[u.role]!==undefined) usersByRole[u.role]++; });
+
+  let html = `
+    <div class="grid grid-4 kpiRow" style="margin-bottom:18px">
+      <div class="card statCard"><div class="label">Negocio</div><div class="value" style="font-size:16px">${settings?.business_name || '—'}</div></div>
+      <div class="card statCard"><div class="label">Ventas totales</div><div class="value">${allSales.length}</div></div>
+      <div class="card statCard"><div class="label">Ingresos totales</div><div class="value brand">${money(ingresos)}</div></div>
+      <div class="card statCard"><div class="label">Usuarios</div><div class="value">${usersByRole.admin} admin · ${usersByRole.vendedor} vend · ${usersByRole.chofer} chofer</div></div>
+    </div>
+    <div class="sectionCard">
+      <h3>Usuarios de la empresa</h3>
+      <div class="tableWrap"><table><thead><tr><th>Nombre</th><th>Rol</th><th>Estado</th></tr></thead><tbody>
+        ${(users||[]).map(u=>`<tr><td>${u.full_name}</td><td><span class="roleTag ${u.role}">${u.role}</span></td><td>${u.active?'<span class="badge paid">Activo</span>':'<span class="badge cancelled">Inactivo</span>'}</td></tr>`).join('') || '<tr><td colspan="3" class="tag">Sin usuarios</td></tr>'}
+      </tbody></table></div>
+    </div>
+    <div class="sectionCard">
+      <h3>Ventas recientes (rutas fijas + especiales)</h3>
+      <div class="tableWrap"><table><thead><tr><th>Folio</th><th>Ruta</th><th>Fecha</th><th>Precio</th><th>Estado</th></tr></thead><tbody>
+        ${(bookings||[]).map(b=>`<tr><td>${b.folio}</td><td>${b.trip_instances?(b.trip_instances.routes.origin+' → '+b.trip_instances.routes.destination):'—'}</td><td>${fmtDate(b.trip_instances?.trip_date)}</td><td>${money(b.price)}</td><td><span class="badge ${b.payment_status}">${b.payment_status}</span></td></tr>`).join('')}
+        ${(specials||[]).map(s=>`<tr><td>${s.folio}</td><td>${s.origin} → ${s.destination} (especial)</td><td>${fmtDate(s.trip_date)}</td><td>${money(s.price)}</td><td><span class="badge ${s.payment_status}">${s.payment_status}</span></td></tr>`).join('')}
+        ${(!bookings || !bookings.length) && (!specials || !specials.length) ? '<tr><td colspan="5" class="tag">Sin ventas registradas</td></tr>' : ''}
+      </tbody></table></div>
+    </div>
+    <div class="sectionCard">
+      <h3>Historial de check-ins de choferes</h3>
+      <div class="tableWrap"><table><thead><tr><th>Chofer</th><th>Ruta</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>
+        ${(checkins||[]).map(c=>`<tr><td>${c.profiles.full_name}</td><td>${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination}</td><td>${fmtDate(c.trip_instances.trip_date)}</td><td><span class="badge ${c.status==='checked_out'?'paid':(c.status==='rejected'?'cancelled':'pending')}">${c.status}</span></td></tr>`).join('') || '<tr><td colspan="4" class="tag">Sin check-ins registrados</td></tr>'}
+      </tbody></table></div>
+    </div>`;
+  content.innerHTML = html;
 }
 
 // ===================== INIT =====================
