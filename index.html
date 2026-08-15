@@ -166,6 +166,13 @@ tr:last-child td{border-bottom:none}
 .capacityBtns{display:flex;gap:6px}
 .capBtn{padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer}
 .capBtn:hover{border-color:var(--brand)}
+
+/* ---------- Gastos del viaje ---------- */
+.expenseTypeBtns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.expTypeBtn{padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.expTypeBtn:hover{border-color:var(--brand)}
+.expTypeBtn.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#04101f;border-color:transparent;font-weight:600}
+.casetaBtns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 </style>
 </head>
 <body>
@@ -280,6 +287,14 @@ tr:last-child td{border-bottom:none}
         <div class="sectionCard"><h3>Ingresos por día</h3><div class="chartWrap"><canvas id="chartIngresos"></canvas></div></div>
         <div class="sectionCard"><h3>Ventas por ruta</h3><div class="chartWrap"><canvas id="chartRutas"></canvas></div></div>
       </div>
+      <div class="grid grid-2" style="margin-bottom:18px">
+        <div class="card statCard"><div class="label">Gastos operativos totales</div><div class="value" id="hist-gastos" style="color:#fca5a5">—</div></div>
+        <div class="card statCard"><div class="label">Combustible vs. casetas vs. otros</div><div class="value" id="hist-gastosDesglose" style="font-size:14px">—</div></div>
+      </div>
+      <div class="sectionCard">
+        <h3>Gastos registrados por choferes</h3>
+        <div class="tableWrap"><table id="tblHistGastos"><thead><tr><th>Chofer</th><th>Ruta</th><th>Tipo</th><th>Detalle</th><th>Monto</th><th>Fecha</th></tr></thead><tbody></tbody></table></div>
+      </div>
       <div class="sectionCard">
         <h3>Historial de salidas (check-ins)</h3>
         <div class="tableWrap"><table id="tblHistCheckins"><thead><tr><th>Chofer</th><th>Ruta</th><th>Fecha</th><th>Solicitado</th><th>Aprobado</th><th>Salida→Llegada</th><th>Estado</th></tr></thead><tbody></tbody></table></div>
@@ -313,6 +328,21 @@ tr:last-child td{border-bottom:none}
         <button class="btn btn-primary" onclick="guardarNegocio()">Guardar cambios</button>
         <div class="errorMsg" id="bizMsg"></div>
       </div>
+
+      <div class="sectionCard" style="max-width:520px">
+        <h3>Recordatorios automáticos por WhatsApp <span class="sub">vía Twilio</span></h3>
+        <p class="tag" style="margin-bottom:14px">Envía un WhatsApp automático a cada pasajero antes de su viaje. Requiere una cuenta de Twilio con WhatsApp habilitado — <a href="https://www.twilio.com/whatsapp" target="_blank" rel="noopener">más información aquí</a>.</p>
+        <div class="field">
+          <label><input type="checkbox" id="waEnabled" style="width:auto;margin-right:6px">Activar recordatorios automáticos</label>
+        </div>
+        <div class="field"><label>Minutos antes de la salida</label><input type="number" id="waMinutes" value="30" min="5" max="180"></div>
+        <div class="field"><label>Twilio Account SID</label><input id="waSid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
+        <div class="field"><label>Twilio Auth Token</label><input id="waToken" type="password" placeholder="••••••••••••••••"></div>
+        <div class="field"><label>Número de WhatsApp remitente (Twilio)</label><input id="waFrom" placeholder="whatsapp:+14155238886"></div>
+        <div class="field"><label>Content SID de la plantilla aprobada (opcional en modo prueba)</label><input id="waTemplate" placeholder="HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
+        <button class="btn btn-primary" onclick="guardarWhatsapp()">Guardar configuración</button>
+        <div class="errorMsg" id="waMsg"></div>
+      </div>
     </div>
 
     <!-- ============ ADMIN: USUARIOS ============ -->
@@ -321,7 +351,7 @@ tr:last-child td{border-bottom:none}
       <div class="pageSub">Administradores, vendedores y choferes</div>
       <div class="toolbar"><button class="btn btn-primary" onclick="openUserModal()">+ Nuevo usuario</button></div>
       <div class="sectionCard">
-        <div class="tableWrap"><table id="tblUsuarios"><thead><tr><th>Nombre</th><th>Rol</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+        <div class="tableWrap"><table id="tblUsuarios"><thead><tr><th>Nombre</th><th>Empresa</th><th>Rol</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
       </div>
     </div>
 
@@ -442,6 +472,18 @@ tr:last-child td{border-bottom:none}
       <div class="sectionCard" id="pasajerosBox"></div>
     </div>
 
+    <!-- ============ CHOFER: GASTOS DEL VIAJE ============ -->
+    <div class="view" id="view-gastos">
+      <div class="pageTitle">Gastos del viaje</div>
+      <div class="pageSub">Registra combustible, casetas y otros gastos de tu salida más reciente</div>
+      <div class="sectionCard" id="gastosContextBox"></div>
+      <div class="sectionCard" id="gastosFormBox"></div>
+      <div class="sectionCard">
+        <h3>Gastos registrados <span class="sub" id="gastosTotal"></span></h3>
+        <div class="tableWrap"><table id="tblGastos"><thead><tr><th>Tipo</th><th>Detalle</th><th>Monto</th><th>Hora</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -456,6 +498,7 @@ tr:last-child td{border-bottom:none}
     <div class="field"><label>Rol</label>
       <select id="nuRole"><option value="vendedor">Vendedor</option><option value="chofer">Chofer</option><option value="admin">Administrador</option></select>
     </div>
+    <div class="field hidden" id="nuCompanyField"><label>Empresa</label><select id="nuCompany"></select></div>
     <div class="errorMsg" id="nuMsg"></div>
     <div class="modalActions">
       <button class="btn btn-outline" onclick="closeUserModal()">Cancelar</button>
@@ -519,6 +562,7 @@ let resetPwdUserId = null;
 const NAV = {
   master: [
     {id:'empresas', label:'Empresas'},
+    {id:'usuarios', label:'Usuarios'},
     {id:'soporte', label:'Soporte / Historial'},
   ],
   admin: [
@@ -541,6 +585,7 @@ const NAV = {
   chofer: [
     {id:'checkin', label:'Check-in / Check-out'},
     {id:'pasajeros', label:'Mis pasajeros'},
+    {id:'gastos', label:'Gastos del viaje'},
   ]
 };
 
@@ -629,6 +674,7 @@ async function goToView(id){
   if(id==='buscar') await loadPendientesCobro();
   if(id==='checkin') await loadCheckin();
   if(id==='pasajeros') await loadPasajeros();
+  if(id==='gastos') await loadGastos();
 }
 
 function money(n){ return '$' + Number(n||0).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}); }
@@ -638,17 +684,19 @@ function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.get
 
 // ===================== BUSINESS SETTINGS =====================
 async function loadBusinessSettings(){
-  const { data } = await sb.from('business_settings').select('*').eq('id',1).single();
+  const { data } = await sb.from('business_settings').select('*').maybeSingle();
   businessSettings = data;
 }
 async function loadNegocioForm(){
   await loadBusinessSettings();
-  if(!businessSettings) return;
-  document.getElementById('bizName').value = businessSettings.business_name || '';
-  document.getElementById('bizPhone').value = businessSettings.phone || '';
-  document.getElementById('bizAddress').value = businessSettings.address || '';
-  document.getElementById('bizEmail').value = businessSettings.email || '';
-  document.getElementById('bizLogo').value = businessSettings.logo_url || '';
+  if(businessSettings){
+    document.getElementById('bizName').value = businessSettings.business_name || '';
+    document.getElementById('bizPhone').value = businessSettings.phone || '';
+    document.getElementById('bizAddress').value = businessSettings.address || '';
+    document.getElementById('bizEmail').value = businessSettings.email || '';
+    document.getElementById('bizLogo').value = businessSettings.logo_url || '';
+  }
+  await loadWhatsappForm();
 }
 async function guardarNegocio(){
   const payload = {
@@ -658,11 +706,41 @@ async function guardarNegocio(){
     email: document.getElementById('bizEmail').value.trim(),
     logo_url: document.getElementById('bizLogo').value.trim(),
   };
-  const { error } = await sb.from('business_settings').update(payload).eq('id',1);
+  const { error } = await sb.from('business_settings').update(payload).eq('company_id', currentProfile.company_id);
   const msg = document.getElementById('bizMsg');
   msg.style.color = error ? '#fca5a5' : '#86efac';
   msg.textContent = error ? error.message : 'Guardado correctamente.';
   await loadBusinessSettings();
+}
+
+// ===================== RECORDATORIOS WHATSAPP =====================
+async function loadWhatsappForm(){
+  const { data } = await sb.from('whatsapp_settings').select('*').eq('company_id', currentProfile.company_id).maybeSingle();
+  document.getElementById('waEnabled').checked = data?.enabled || false;
+  document.getElementById('waMinutes').value = data?.reminder_minutes_before || 30;
+  document.getElementById('waSid').value = data?.twilio_account_sid || '';
+  document.getElementById('waToken').value = data?.twilio_auth_token || '';
+  document.getElementById('waFrom').value = data?.twilio_whatsapp_from || '';
+  document.getElementById('waTemplate').value = data?.twilio_template_sid || '';
+}
+async function guardarWhatsapp(){
+  const msg = document.getElementById('waMsg'); msg.textContent = '';
+  const payload = {
+    company_id: currentProfile.company_id,
+    enabled: document.getElementById('waEnabled').checked,
+    reminder_minutes_before: parseInt(document.getElementById('waMinutes').value) || 30,
+    twilio_account_sid: document.getElementById('waSid').value.trim() || null,
+    twilio_auth_token: document.getElementById('waToken').value.trim() || null,
+    twilio_whatsapp_from: document.getElementById('waFrom').value.trim() || null,
+    twilio_template_sid: document.getElementById('waTemplate').value.trim() || null,
+  };
+  if(payload.enabled && (!payload.twilio_account_sid || !payload.twilio_auth_token || !payload.twilio_whatsapp_from)){
+    msg.textContent = 'Para activar, completa al menos el Account SID, Auth Token y número remitente de Twilio.';
+    return;
+  }
+  const { error } = await sb.from('whatsapp_settings').upsert(payload, { onConflict:'company_id' });
+  msg.style.color = error ? '#fca5a5' : '#86efac';
+  msg.textContent = error ? error.message : 'Configuración guardada correctamente.';
 }
 
 // ===================== DASHBOARD =====================
@@ -767,13 +845,14 @@ async function generarSalidas(){
 
 // ===================== USUARIOS =====================
 async function loadUsuarios(){
-  const { data } = await sb.from('profiles').select('*').order('role');
+  const { data } = await sb.from('profiles').select('*, companies(name)').order('role');
   const tbody = document.querySelector('#tblUsuarios tbody');
   tbody.innerHTML = '';
   (data||[]).forEach(u=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${u.full_name}</td>
+      <td>${u.companies?.name || '—'}</td>
       <td><span class="roleTag ${u.role}">${u.role}</span></td>
       <td>${u.phone||'—'}</td>
       <td>${u.active? '<span class="badge paid">Activo</span>' : '<span class="badge cancelled">Inactivo</span>'}</td>
@@ -785,9 +864,22 @@ async function loadUsuarios(){
     tbody.appendChild(tr);
   });
 }
-function openUserModal(){ document.getElementById('userModal').classList.add('active'); document.getElementById('nuMsg').textContent=''; }
+async function openUserModal(preselectCompanyId){
+  document.getElementById('userModal').classList.add('active');
+  document.getElementById('nuMsg').textContent='';
+  const companyField = document.getElementById('nuCompanyField');
+  if(currentProfile.role === 'master'){
+    companyField.classList.remove('hidden');
+    const { data: companies } = await sb.from('companies').select('*').eq('active', true).order('name');
+    document.getElementById('nuCompany').innerHTML = (companies||[]).map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    if(preselectCompanyId) document.getElementById('nuCompany').value = preselectCompanyId;
+  } else {
+    companyField.classList.add('hidden');
+  }
+}
 function closeUserModal(){ document.getElementById('userModal').classList.remove('active'); }
 async function crearUsuario(){
+  const isMaster = currentProfile.role === 'master';
   const payload = {
     full_name: document.getElementById('nuFullname').value.trim(),
     email: document.getElementById('nuEmail').value.trim(),
@@ -795,11 +887,14 @@ async function crearUsuario(){
     phone: document.getElementById('nuPhone').value.trim(),
     role: document.getElementById('nuRole').value,
   };
+  if(isMaster) payload.company_id = document.getElementById('nuCompany').value;
   const msg = document.getElementById('nuMsg');
   if(!payload.full_name || !payload.email || !payload.password){ msg.textContent = 'Completa todos los campos obligatorios.'; return; }
+  if(isMaster && !payload.company_id){ msg.textContent = 'Selecciona una empresa.'; return; }
   const { data: { session } } = await sb.auth.getSession();
+  const endpoint = isMaster ? 'master-create-user' : 'admin-create-user';
   try{
-    const res = await fetch(SUPABASE_URL + '/functions/v1/admin-create-user', {
+    const res = await fetch(SUPABASE_URL + '/functions/v1/' + endpoint, {
       method: 'POST',
       headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+session.access_token },
       body: JSON.stringify(payload)
@@ -807,7 +902,8 @@ async function crearUsuario(){
     const json = await res.json();
     if(!res.ok){ msg.textContent = json.error || 'Error al crear usuario.'; return; }
     closeUserModal();
-    await loadUsuarios();
+    if(document.getElementById('view-soporte').classList.contains('active')) await loadSoporte();
+    else await loadUsuarios();
   }catch(e){
     msg.textContent = 'Error de conexión: ' + e.message;
   }
@@ -1286,6 +1382,122 @@ async function loadPasajeros(){
   box.innerHTML = html;
 }
 
+// ===================== CHOFER: GASTOS DEL VIAJE =====================
+const CASETAS_CONOCIDAS = ['Autopista Saltillo', 'La Carbonera', 'Los Chorros'];
+let gastosSelectedType = null;
+let gastosCurrentCheckin = null;
+
+async function getLatestCheckinForExpenses(){
+  const { data } = await sb.from('driver_checkins').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))')
+    .eq('driver_id', currentUser.id).order('created_at',{ascending:false}).limit(1);
+  return (data && data[0]) || null;
+}
+async function loadGastos(){
+  gastosCurrentCheckin = await getLatestCheckinForExpenses();
+  const ctxBox = document.getElementById('gastosContextBox');
+  const formBox = document.getElementById('gastosFormBox');
+  if(!gastosCurrentCheckin){
+    ctxBox.innerHTML = '<p class="tag">Aún no tienes ninguna salida registrada. Haz check-in primero desde "Check-in / Check-out".</p>';
+    formBox.innerHTML = '';
+    document.querySelector('#tblGastos tbody').innerHTML = '';
+    document.getElementById('gastosTotal').textContent = '';
+    return;
+  }
+  const c = gastosCurrentCheckin;
+  ctxBox.innerHTML = `<h3>Salida: ${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination}</h3>
+    <p class="tag">${fmtDate(c.trip_instances.trip_date)} · ${fmtTime(c.trip_instances.departure_time)} · Estado: <span class="badge ${c.status==='checked_out'?'paid':(c.status==='rejected'?'cancelled':'pending')}">${c.status}</span></p>`;
+  renderGastosForm();
+  await refreshGastosList();
+}
+function renderGastosForm(){
+  const formBox = document.getElementById('gastosFormBox');
+  formBox.innerHTML = `
+    <h3>Agregar gasto</h3>
+    <div class="expenseTypeBtns">
+      <button type="button" class="expTypeBtn ${gastosSelectedType==='gasolina_verde'?'active':''}" onclick="selectGastoTipo('gasolina_verde')">⛽ Gasolina Verde</button>
+      <button type="button" class="expTypeBtn ${gastosSelectedType==='gasolina_roja'?'active':''}" onclick="selectGastoTipo('gasolina_roja')">⛽ Gasolina Roja</button>
+      <button type="button" class="expTypeBtn ${gastosSelectedType==='caseta'?'active':''}" onclick="selectGastoTipo('caseta')">🛣️ Caseta</button>
+      <button type="button" class="expTypeBtn ${gastosSelectedType==='otro'?'active':''}" onclick="selectGastoTipo('otro')">➕ Otro gasto</button>
+    </div>
+    <div id="gastoDetalleWrap"></div>
+    <div class="formRow" style="margin-top:12px">
+      <div class="field" style="max-width:160px"><label>Monto</label><input type="number" id="gastoMonto" step="0.01" min="0"></div>
+      <div class="field"><label>Nota (opcional)</label><input id="gastoNota" placeholder="Ej. ticket #1234"></div>
+    </div>
+    <div style="margin-top:14px"><button class="btn btn-primary" onclick="guardarGasto()">Agregar gasto</button></div>
+    <div class="errorMsg" id="gastoMsg"></div>`;
+  renderGastoDetalle();
+}
+function selectGastoTipo(tipo){
+  gastosSelectedType = tipo;
+  renderGastosForm();
+}
+function renderGastoDetalle(){
+  const wrap = document.getElementById('gastoDetalleWrap');
+  if(!wrap) return;
+  if(gastosSelectedType === 'caseta'){
+    wrap.innerHTML = `
+      <div class="casetaBtns">
+        ${CASETAS_CONOCIDAS.map(c=>`<button type="button" class="capBtn" onclick="document.getElementById('gastoLabel').value='${c}'">${c}</button>`).join('')}
+      </div>
+      <div class="field"><label>Nombre de la caseta</label><input id="gastoLabel" placeholder="Ej. Autopista Saltillo, o escribe otra"></div>`;
+  } else if(gastosSelectedType === 'otro'){
+    wrap.innerHTML = `<div class="field"><label>Descripción del gasto</label><input id="gastoLabel" placeholder="Ej. reparación de llanta, comida, etc."></div>`;
+  } else if(gastosSelectedType === 'gasolina_verde' || gastosSelectedType === 'gasolina_roja'){
+    wrap.innerHTML = `<p class="tag">${gastosSelectedType==='gasolina_verde' ? 'Gasolina Magna (verde)' : 'Gasolina Premium (roja)'}</p>`;
+  } else {
+    wrap.innerHTML = `<p class="tag">Selecciona el tipo de gasto arriba.</p>`;
+  }
+}
+async function guardarGasto(){
+  const msg = document.getElementById('gastoMsg'); msg.textContent = '';
+  if(!gastosSelectedType){ msg.textContent = 'Selecciona el tipo de gasto.'; return; }
+  const monto = document.getElementById('gastoMonto').value;
+  if(!monto || Number(monto) <= 0){ msg.textContent = 'Indica un monto válido.'; return; }
+  let label = null;
+  if(gastosSelectedType === 'caseta' || gastosSelectedType === 'otro'){
+    label = document.getElementById('gastoLabel')?.value.trim();
+    if(!label){ msg.textContent = gastosSelectedType === 'caseta' ? 'Indica el nombre de la caseta.' : 'Describe el gasto.'; return; }
+  }
+  const nota = document.getElementById('gastoNota').value.trim();
+  const payload = {
+    checkin_id: gastosCurrentCheckin.id,
+    driver_id: currentUser.id,
+    expense_type: gastosSelectedType,
+    label: label,
+    amount: monto,
+    notes: nota || null,
+  };
+  const { error } = await sb.from('trip_expenses').insert(payload);
+  if(error){ msg.textContent = error.message; return; }
+  document.getElementById('gastoMonto').value = '';
+  document.getElementById('gastoNota').value = '';
+  gastosSelectedType = null;
+  renderGastosForm();
+  await refreshGastosList();
+}
+async function refreshGastosList(){
+  const { data } = await sb.from('trip_expenses').select('*').eq('checkin_id', gastosCurrentCheckin.id).order('created_at',{ascending:false});
+  const tbody = document.querySelector('#tblGastos tbody');
+  tbody.innerHTML = '';
+  const labels = { gasolina_verde:'⛽ Gasolina Verde', gasolina_roja:'⛽ Gasolina Roja', caseta:'🛣️ Caseta', otro:'➕ Otro' };
+  let total = 0;
+  (data||[]).forEach(g=>{
+    total += Number(g.amount);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${labels[g.expense_type]||g.expense_type}</td><td>${g.label || g.notes || '—'}</td><td>${money(g.amount)}</td><td>${new Date(g.created_at).toLocaleTimeString('es-MX')}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="eliminarGasto('${g.id}')">Eliminar</button></td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('gastosTotal').textContent = data && data.length ? `total: ${money(total)}` : '';
+  if(!data || !data.length) tbody.innerHTML = '<tr><td colspan="5" class="tag">Aún no has registrado gastos para esta salida.</td></tr>';
+}
+async function eliminarGasto(id){
+  if(!confirm('¿Eliminar este gasto?')) return;
+  await sb.from('trip_expenses').delete().eq('id', id);
+  await refreshGastosList();
+}
+
 // ===================== ADMIN/VENDEDOR: MONITOREO EN VIVO =====================
 let liveMap = null;
 let mapMarkers = {};
@@ -1445,6 +1657,32 @@ async function loadHistorial(){
     options:{ plugins:{ legend:{display:false} }, scales:{ x:{ ticks:{color:'#8ea0c4'}, grid:{display:false} }, y:{ ticks:{color:'#8ea0c4'}, grid:{color:'#233150'} } } }
   });
 
+  // Gastos operativos (combustible, casetas, otros)
+  const { data: expenses } = await sb.from('trip_expenses')
+    .select('*, profiles(full_name), trip_instances(routes(origin,destination))')
+    .gte('created_at', desde+'T00:00:00').lte('created_at', hasta+'T23:59:59')
+    .order('created_at',{ascending:false}).limit(300);
+  const expLabels = { gasolina_verde:'⛽ Gasolina Verde', gasolina_roja:'⛽ Gasolina Roja', caseta:'🛣️ Caseta', otro:'➕ Otro' };
+  let gastoTotal = 0; const porTipo = { gasolina:0, caseta:0, otro:0 };
+  (expenses||[]).forEach(e=>{
+    const m = Number(e.amount);
+    gastoTotal += m;
+    if(e.expense_type === 'caseta') porTipo.caseta += m;
+    else if(e.expense_type === 'otro') porTipo.otro += m;
+    else porTipo.gasolina += m;
+  });
+  document.getElementById('hist-gastos').textContent = money(gastoTotal);
+  document.getElementById('hist-gastosDesglose').textContent = `⛽ ${money(porTipo.gasolina)} · 🛣️ ${money(porTipo.caseta)} · ➕ ${money(porTipo.otro)}`;
+  const tbodyGastos = document.querySelector('#tblHistGastos tbody');
+  tbodyGastos.innerHTML = '';
+  (expenses||[]).forEach(e=>{
+    const tr = document.createElement('tr');
+    const ruta = e.trip_instances ? (e.trip_instances.routes.origin+' → '+e.trip_instances.routes.destination) : '—';
+    tr.innerHTML = `<td>${e.profiles?.full_name || '—'}</td><td>${ruta}</td><td>${expLabels[e.expense_type]||e.expense_type}</td><td>${e.label || e.notes || '—'}</td><td>${money(e.amount)}</td><td>${new Date(e.created_at).toLocaleString('es-MX')}</td>`;
+    tbodyGastos.appendChild(tr);
+  });
+  if(!expenses || !expenses.length) tbodyGastos.innerHTML = '<tr><td colspan="6" class="tag">Sin gastos registrados en este periodo.</td></tr>';
+
   // Historial de check-ins
   const { data: checkins } = await sb.from('driver_checkins')
     .select('*, profiles!driver_checkins_driver_id_fkey(full_name), trip_instances(trip_date,routes(origin,destination))')
@@ -1541,9 +1779,11 @@ async function loadSoporte(){
   const { data: bookings } = await sb.from('bookings').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))').eq('company_id', companyId).order('created_at',{ascending:false}).limit(30);
   const { data: specials } = await sb.from('special_trips').select('*').eq('company_id', companyId).order('created_at',{ascending:false}).limit(30);
   const { data: checkins } = await sb.from('driver_checkins').select('*, profiles!driver_checkins_driver_id_fkey(full_name), trip_instances(trip_date,routes(origin,destination))').eq('company_id', companyId).order('created_at',{ascending:false}).limit(30);
+  const { data: expenses } = await sb.from('trip_expenses').select('amount').eq('company_id', companyId);
 
   const allSales = [...(bookings||[]), ...(specials||[])];
   const ingresos = allSales.filter(x=>x.payment_status==='paid').reduce((a,b)=>a+Number(b.price||0),0);
+  const gastosTotal = (expenses||[]).reduce((a,e)=>a+Number(e.amount||0),0);
   const usersByRole = { admin:0, vendedor:0, chofer:0 };
   (users||[]).forEach(u=>{ if(usersByRole[u.role]!==undefined) usersByRole[u.role]++; });
 
@@ -1552,10 +1792,10 @@ async function loadSoporte(){
       <div class="card statCard"><div class="label">Negocio</div><div class="value" style="font-size:16px">${settings?.business_name || '—'}</div></div>
       <div class="card statCard"><div class="label">Ventas totales</div><div class="value">${allSales.length}</div></div>
       <div class="card statCard"><div class="label">Ingresos totales</div><div class="value brand">${money(ingresos)}</div></div>
-      <div class="card statCard"><div class="label">Usuarios</div><div class="value">${usersByRole.admin} admin · ${usersByRole.vendedor} vend · ${usersByRole.chofer} chofer</div></div>
+      <div class="card statCard"><div class="label">Gastos operativos</div><div class="value" style="color:#fca5a5">${money(gastosTotal)}</div></div>
     </div>
     <div class="sectionCard">
-      <h3>Usuarios de la empresa</h3>
+      <h3>Usuarios de la empresa <button class="btn btn-primary btn-sm" onclick="openUserModal('${companyId}')">+ Nuevo usuario</button></h3>
       <div class="tableWrap"><table><thead><tr><th>Nombre</th><th>Rol</th><th>Estado</th></tr></thead><tbody>
         ${(users||[]).map(u=>`<tr><td>${u.full_name}</td><td><span class="roleTag ${u.role}">${u.role}</span></td><td>${u.active?'<span class="badge paid">Activo</span>':'<span class="badge cancelled">Inactivo</span>'}</td></tr>`).join('') || '<tr><td colspan="3" class="tag">Sin usuarios</td></tr>'}
       </tbody></table></div>
