@@ -328,10 +328,15 @@ tr:last-child td{border-bottom:none}
         <button class="btn btn-primary" onclick="guardarNegocio()">Guardar cambios</button>
         <div class="errorMsg" id="bizMsg"></div>
       </div>
+    </div>
 
+    <!-- ============ ADMIN: WHATSAPP ============ -->
+    <div class="view" id="view-whatsapp">
+      <div class="pageTitle">Recordatorios por WhatsApp</div>
+      <div class="pageSub">Envía un WhatsApp automático a cada pasajero antes de su viaje, vía Twilio</div>
       <div class="sectionCard" style="max-width:520px">
-        <h3>Recordatorios automáticos por WhatsApp <span class="sub">vía Twilio</span></h3>
-        <p class="tag" style="margin-bottom:14px">Envía un WhatsApp automático a cada pasajero antes de su viaje. Requiere una cuenta de Twilio con WhatsApp habilitado — <a href="https://www.twilio.com/whatsapp" target="_blank" rel="noopener">más información aquí</a>.</p>
+        <div id="waStatusBox" class="tag" style="margin-bottom:14px"></div>
+        <p class="tag" style="margin-bottom:14px">Requiere una cuenta de Twilio con WhatsApp habilitado — <a href="https://www.twilio.com/whatsapp" target="_blank" rel="noopener">más información aquí</a>. El envío automático corre cada 5 minutos revisando quién sale pronto.</p>
         <div class="field">
           <label><input type="checkbox" id="waEnabled" style="width:auto;margin-right:6px">Activar recordatorios automáticos</label>
         </div>
@@ -342,6 +347,14 @@ tr:last-child td{border-bottom:none}
         <div class="field"><label>Content SID de la plantilla aprobada (opcional en modo prueba)</label><input id="waTemplate" placeholder="HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
         <button class="btn btn-primary" onclick="guardarWhatsapp()">Guardar configuración</button>
         <div class="errorMsg" id="waMsg"></div>
+      </div>
+      <div class="sectionCard" style="max-width:520px">
+        <h3>Probar envío</h3>
+        <p class="tag" style="margin-bottom:10px">Guarda la configuración primero. Esto envía un mensaje real de inmediato (no espera los 30 minutos) para confirmar que Twilio esté funcionando.</p>
+        <div class="field"><label>Número de WhatsApp de prueba</label><input id="waTestPhone" placeholder="Ej. 4441234567"></div>
+        <button class="btn btn-outline" onclick="probarWhatsapp()">Enviar mensaje de prueba</button>
+        <div class="errorMsg" id="waTestMsg"></div>
+        <pre id="waTestResult" style="white-space:pre-wrap;font-size:11px;color:var(--muted);margin-top:10px;max-height:200px;overflow:auto"></pre>
       </div>
     </div>
 
@@ -435,10 +448,13 @@ tr:last-child td{border-bottom:none}
 
     <!-- ============ VENDEDOR: AGENDA ============ -->
     <div class="view" id="view-agenda">
-      <div class="pageTitle">Agenda de viajes</div>
-      <div class="pageSub">Disponibilidad de las próximas salidas</div>
-      <div class="toolbar"><div class="field"><label>Desde</label><input type="date" id="agendaDesde" onchange="cargarAgenda()"></div></div>
-      <div class="sectionCard"><div class="tableWrap"><table id="tblAgenda"><thead><tr><th>Ruta</th><th>Fecha</th><th>Hora</th><th>Ocupación</th><th>Precio</th><th></th></tr></thead><tbody></tbody></table></div></div>
+      <div class="pageTitle">Lugares Agendados</div>
+      <div class="pageSub">Todos los boletos vendidos y apartados, agrupados automáticamente por día, ruta y horario</div>
+      <div class="toolbar">
+        <div class="field"><label>Desde</label><input type="date" id="agendaDesde" onchange="cargarAgenda()"></div>
+        <div class="field"><label>Hasta</label><input type="date" id="agendaHasta" onchange="cargarAgenda()"></div>
+      </div>
+      <div id="agendaContent"></div>
     </div>
 
     <!-- ============ VENDEDOR/ADMIN: BUSCAR / COBRAR ============ -->
@@ -577,9 +593,11 @@ const NAV = {
   admin: [
     {id:'dashboard', label:'Panel general'},
     {id:'monitoreo', label:'Monitoreo en vivo'},
+    {id:'agenda', label:'Lugares Agendados'},
     {id:'historial', label:'Historial y estadísticas'},
     {id:'rutas', label:'Rutas y precios'},
     {id:'negocio', label:'Datos del negocio'},
+    {id:'whatsapp', label:'Recordatorios WhatsApp'},
     {id:'usuarios', label:'Usuarios'},
     {id:'reportes', label:'Reportes'},
     {id:'buscar', label:'Buscar / cobrar'},
@@ -588,7 +606,7 @@ const NAV = {
     {id:'venta', label:'Nueva venta'},
     {id:'especiales', label:'Viajes especiales'},
     {id:'monitoreo', label:'Monitoreo en vivo'},
-    {id:'agenda', label:'Agenda'},
+    {id:'agenda', label:'Lugares Agendados'},
     {id:'buscar', label:'Buscar / cobrar'},
   ],
   chofer: [
@@ -675,6 +693,7 @@ async function goToView(id){
   if(id==='historial') await loadHistorial();
   if(id==='rutas') await loadRutas();
   if(id==='negocio') await loadNegocioForm();
+  if(id==='whatsapp') await loadWhatsappForm();
   if(id==='usuarios') await loadUsuarios();
   if(id==='reportes') { /* espera búsqueda */ }
   if(id==='venta') await loadVentaForm();
@@ -705,7 +724,6 @@ async function loadNegocioForm(){
     document.getElementById('bizEmail').value = businessSettings.email || '';
     document.getElementById('bizLogo').value = businessSettings.logo_url || '';
   }
-  await loadWhatsappForm();
 }
 async function guardarNegocio(){
   const payload = {
@@ -731,6 +749,16 @@ async function loadWhatsappForm(){
   document.getElementById('waToken').value = data?.twilio_auth_token || '';
   document.getElementById('waFrom').value = data?.twilio_whatsapp_from || '';
   document.getElementById('waTemplate').value = data?.twilio_template_sid || '';
+
+  const statusBox = document.getElementById('waStatusBox');
+  const configured = !!(data?.twilio_account_sid && data?.twilio_auth_token && data?.twilio_whatsapp_from);
+  if(data?.enabled && configured){
+    statusBox.innerHTML = '<span class="badge paid">Activado</span> Los recordatorios se están enviando automáticamente.';
+  } else if(configured){
+    statusBox.innerHTML = '<span class="badge cancelled">Desactivado</span> Tienes credenciales guardadas pero el interruptor está apagado.';
+  } else {
+    statusBox.innerHTML = '<span class="badge pending">Sin configurar</span> Aún no has guardado tus credenciales de Twilio — los recordatorios no se enviarán hasta que lo hagas.';
+  }
 }
 async function guardarWhatsapp(){
   const msg = document.getElementById('waMsg'); msg.textContent = '';
@@ -750,6 +778,25 @@ async function guardarWhatsapp(){
   const { error } = await sb.from('whatsapp_settings').upsert(payload, { onConflict:'company_id' });
   msg.style.color = error ? '#fca5a5' : '#86efac';
   msg.textContent = error ? error.message : 'Configuración guardada correctamente.';
+  await loadWhatsappForm();
+}
+async function probarWhatsapp(){
+  const msg = document.getElementById('waTestMsg'); msg.textContent = '';
+  const resultBox = document.getElementById('waTestResult'); resultBox.textContent = '';
+  const phone = document.getElementById('waTestPhone').value.trim();
+  if(!phone){ msg.textContent = 'Indica un número de WhatsApp de prueba.'; return; }
+  const { data: { session } } = await sb.auth.getSession();
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/whatsapp-test-send', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify({ phone })
+    });
+    const json = await res.json();
+    if(!res.ok || json.error){ msg.textContent = json.error || 'No se pudo enviar.'; return; }
+    msg.style.color = json.success ? '#86efac' : '#fca5a5';
+    msg.textContent = json.success ? 'Mensaje enviado. Revisa el WhatsApp de prueba.' : 'Twilio respondió con un error (ver detalle abajo).';
+    resultBox.textContent = JSON.stringify(json.twilio_response, null, 2);
+  }catch(e){ msg.textContent = 'Error de conexión: ' + e.message; }
 }
 
 // ===================== DASHBOARD =====================
@@ -1171,18 +1218,47 @@ async function marcarPagadoEspecial(id){
 async function cargarAgenda(){
   const desde = document.getElementById('agendaDesde').value || todayStr();
   document.getElementById('agendaDesde').value = desde;
-  const { data } = await sb.from('trip_instances').select('*, routes(origin,destination)').gte('trip_date', desde).order('trip_date').order('departure_time').limit(100);
-  const tbody = document.querySelector('#tblAgenda tbody');
-  tbody.innerHTML = '';
-  (data||[]).forEach(t=>{
-    const pct = Math.round((t.seats_booked/t.total_seats)*100);
-    const ruta = `${t.routes.origin} → ${t.routes.destination}`;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${ruta}</td><td>${fmtDate(t.trip_date)}</td><td>${fmtTime(t.departure_time)}</td>
-      <td>${t.seats_booked}/${t.total_seats}<div class="seatBar"><div style="width:${pct}%"></div></div></td><td>${money(t.price)}</td>
-      <td><button class="btn btn-outline btn-sm" onclick="verPasajerosDeSalida('${t.id}', '${ruta.replace(/'/g,"\\'")}', '${fmtDate(t.trip_date)}', '${fmtTime(t.departure_time)}')">Ver pasajeros</button></td>`;
-    tbody.appendChild(tr);
+  let hasta = document.getElementById('agendaHasta').value;
+  if(!hasta){ const d = new Date(desde+'T00:00:00'); d.setDate(d.getDate()+3); hasta = d.toISOString().slice(0,10); document.getElementById('agendaHasta').value = hasta; }
+
+  const { data: trips } = await sb.from('trip_instances').select('*, routes(origin,destination)').gte('trip_date', desde).lte('trip_date', hasta).order('trip_date').order('departure_time');
+  const content = document.getElementById('agendaContent');
+
+  if(!trips || !trips.length){ content.innerHTML = '<p class="tag">No hay salidas generadas en este rango de fechas. Ve a "Rutas y precios" para generarlas.</p>'; return; }
+
+  const tripIds = trips.map(t=>t.id);
+  const { data: bookings } = await sb.from('bookings').select('*').in('trip_instance_id', tripIds).neq('payment_status','cancelled').order('seat_number');
+  const bookingsByTrip = {};
+  (bookings||[]).forEach(b=>{ (bookingsByTrip[b.trip_instance_id] = bookingsByTrip[b.trip_instance_id] || []).push(b); });
+
+  const byDate = {};
+  trips.forEach(t=>{ (byDate[t.trip_date] = byDate[t.trip_date] || []).push(t); });
+
+  let html = '';
+  Object.keys(byDate).sort().forEach(date=>{
+    html += `<div class="sectionCard"><h3>${fmtDate(date)}</h3>`;
+    byDate[date].forEach(t=>{
+      const bks = bookingsByTrip[t.id] || [];
+      const pct = Math.round((t.seats_booked/t.total_seats)*100);
+      html += `<div style="margin-bottom:18px">
+        <div class="tripCard">
+          <div class="info"><b>${t.routes.origin} → ${t.routes.destination}</b> · ${fmtTime(t.departure_time)}
+            <div class="seatBar" style="max-width:200px"><div style="width:${pct}%"></div></div>
+            <span class="tag">${t.seats_booked}/${t.total_seats} ocupados · ${money(t.price)}</span>
+          </div>
+        </div>`;
+      if(bks.length){
+        html += `<div class="tableWrap"><table><thead><tr><th>Asiento</th><th>Pasajero</th><th>Teléfono</th><th>Precio</th><th>Estado</th></tr></thead><tbody>`;
+        bks.forEach(b=>{ html += `<tr><td>${b.seat_number||'—'}</td><td>${b.passenger_name}</td><td>${b.passenger_phone}</td><td>${money(b.price)}</td><td><span class="badge ${b.payment_status}">${b.payment_status}</span></td></tr>`; });
+        html += `</tbody></table></div>`;
+      } else {
+        html += `<p class="tag" style="margin:8px 0 0">Sin lugares agendados todavía.</p>`;
+      }
+      html += `</div>`;
+    });
+    html += `</div>`;
   });
+  content.innerHTML = html;
 }
 async function verPasajerosDeSalida(tripId, rutaLabel, fechaLabel, horaLabel){
   const { data } = await sb.from('bookings').select('*').eq('trip_instance_id', tripId).neq('payment_status','cancelled').order('seat_number');
