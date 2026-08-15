@@ -438,7 +438,7 @@ tr:last-child td{border-bottom:none}
       <div class="pageTitle">Agenda de viajes</div>
       <div class="pageSub">Disponibilidad de las próximas salidas</div>
       <div class="toolbar"><div class="field"><label>Desde</label><input type="date" id="agendaDesde" onchange="cargarAgenda()"></div></div>
-      <div class="sectionCard"><div class="tableWrap"><table id="tblAgenda"><thead><tr><th>Ruta</th><th>Fecha</th><th>Hora</th><th>Ocupación</th><th>Precio</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="sectionCard"><div class="tableWrap"><table id="tblAgenda"><thead><tr><th>Ruta</th><th>Fecha</th><th>Hora</th><th>Ocupación</th><th>Precio</th><th></th></tr></thead><tbody></tbody></table></div></div>
     </div>
 
     <!-- ============ VENDEDOR/ADMIN: BUSCAR / COBRAR ============ -->
@@ -525,6 +525,15 @@ tr:last-child td{border-bottom:none}
     <div class="modalActions">
       <button class="btn btn-outline" onclick="closePwdModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="confirmarResetPwd()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalBg" id="manifestModal">
+  <div class="modalCard" style="max-width:560px">
+    <div id="manifestContent"></div>
+    <div class="modalActions">
+      <button class="btn btn-outline" onclick="closeManifestModal()">Cerrar</button>
     </div>
   </div>
 </div>
@@ -1167,12 +1176,27 @@ async function cargarAgenda(){
   tbody.innerHTML = '';
   (data||[]).forEach(t=>{
     const pct = Math.round((t.seats_booked/t.total_seats)*100);
+    const ruta = `${t.routes.origin} → ${t.routes.destination}`;
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${t.routes.origin} → ${t.routes.destination}</td><td>${fmtDate(t.trip_date)}</td><td>${fmtTime(t.departure_time)}</td>
-      <td>${t.seats_booked}/${t.total_seats}<div class="seatBar"><div style="width:${pct}%"></div></div></td><td>${money(t.price)}</td>`;
+    tr.innerHTML = `<td>${ruta}</td><td>${fmtDate(t.trip_date)}</td><td>${fmtTime(t.departure_time)}</td>
+      <td>${t.seats_booked}/${t.total_seats}<div class="seatBar"><div style="width:${pct}%"></div></div></td><td>${money(t.price)}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="verPasajerosDeSalida('${t.id}', '${ruta.replace(/'/g,"\\'")}', '${fmtDate(t.trip_date)}', '${fmtTime(t.departure_time)}')">Ver pasajeros</button></td>`;
     tbody.appendChild(tr);
   });
 }
+async function verPasajerosDeSalida(tripId, rutaLabel, fechaLabel, horaLabel){
+  const { data } = await sb.from('bookings').select('*').eq('trip_instance_id', tripId).neq('payment_status','cancelled').order('seat_number');
+  let html = `<h3>${rutaLabel}</h3><p class="tag">${fechaLabel} · ${horaLabel}</p>`;
+  html += `<div class="tableWrap"><table><thead><tr><th>Asiento</th><th>Pasajero</th><th>Teléfono</th><th>Precio</th><th>Estado</th></tr></thead><tbody>`;
+  (data||[]).forEach(b=>{
+    html += `<tr><td>${b.seat_number||'—'}</td><td>${b.passenger_name}</td><td>${b.passenger_phone}</td><td>${money(b.price)}</td><td><span class="badge ${b.payment_status}">${b.payment_status}</span></td></tr>`;
+  });
+  html += `</tbody></table></div>`;
+  if(!data || !data.length) html += '<p class="tag" style="margin-top:10px">Aún no hay lugares agendados para esta salida.</p>';
+  document.getElementById('manifestContent').innerHTML = html;
+  document.getElementById('manifestModal').classList.add('active');
+}
+function closeManifestModal(){ document.getElementById('manifestModal').classList.remove('active'); }
 
 // ===================== BUSCAR / COBRAR =====================
 let buscarLastMode = 'pendientes';
@@ -1372,11 +1396,12 @@ function stopGpsTracking(){
 async function loadPasajeros(){
   const active = await getActiveCheckin();
   const box = document.getElementById('pasajerosBox');
-  if(!active || active.status !== 'approved'){ box.innerHTML = '<p class="tag">No tienes un turno activo aprobado. Solicita y espera aprobación primero.</p>'; return; }
-  const { data: bookings } = await sb.from('bookings').select('*').eq('trip_instance_id', active.trip_instance_id).eq('payment_status','paid').order('passenger_name');
+  if(!active){ box.innerHTML = '<p class="tag">No tienes ninguna salida solicitada. Ve a "Check-in / Check-out" para solicitar una.</p>'; return; }
+  const { data: bookings } = await sb.from('bookings').select('*').eq('trip_instance_id', active.trip_instance_id).eq('payment_status','paid').order('seat_number');
   let html = `<h3>${active.trip_instances.routes.origin} → ${active.trip_instances.routes.destination} · ${fmtTime(active.trip_instances.departure_time)}</h3>`;
-  html += `<div class="tableWrap"><table><thead><tr><th>Pasajero</th><th>Teléfono</th><th>Lugar de abordaje</th></tr></thead><tbody>`;
-  (bookings||[]).forEach(b=>{ html += `<tr><td>${b.passenger_name}</td><td>${b.passenger_phone}</td><td>${b.boarding_point||'—'}</td></tr>`; });
+  if(active.status === 'pending') html += `<p class="tag" style="margin-bottom:10px">Tu salida aún no ha sido aprobada — esta es la lista preliminar de pasajeros confirmados hasta el momento.</p>`;
+  html += `<div class="tableWrap"><table><thead><tr><th>Asiento</th><th>Pasajero</th><th>Teléfono</th><th>Lugar de abordaje</th></tr></thead><tbody>`;
+  (bookings||[]).forEach(b=>{ html += `<tr><td>${b.seat_number||'—'}</td><td>${b.passenger_name}</td><td>${b.passenger_phone}</td><td>${b.boarding_point||'—'}</td></tr>`; });
   html += `</tbody></table></div>`;
   if(!bookings || !bookings.length) html += '<p class="tag" style="margin-top:10px">Aún no hay pasajeros con pago confirmado.</p>';
   box.innerHTML = html;
