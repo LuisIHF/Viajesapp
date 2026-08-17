@@ -311,7 +311,17 @@ tr:last-child td{border-bottom:none}
     <!-- ============ ADMIN: RUTAS Y PRECIOS ============ -->
     <div class="view" id="view-rutas">
       <div class="pageTitle">Rutas, horarios y precios</div>
-      <div class="pageSub">Configura horarios recurrentes por ruta y genera las salidas del calendario</div>
+      <div class="pageSub">Configura tus rutas, sus horarios recurrentes y genera las salidas del calendario</div>
+      <div class="sectionCard">
+        <h3>Nueva ruta</h3>
+        <div class="formRow">
+          <div class="field"><label>Origen</label><input id="newRouteOrigen" placeholder="Ej. Matehuala, San Luis Potosí"></div>
+          <div class="field"><label>Destino</label><input id="newRouteDestino" placeholder="Ej. Monterrey, Nuevo León"></div>
+          <div class="field" style="max-width:140px"><label>Código (opcional)</label><input id="newRouteCode" placeholder="Ej. MTZ-MTY"></div>
+          <button class="btn btn-primary" onclick="crearRuta()">+ Agregar ruta</button>
+        </div>
+        <div class="errorMsg" id="newRouteMsg"></div>
+      </div>
       <div class="sectionCard">
         <h3>Generar salidas <span class="sub">crea las fechas concretas a partir de los horarios activos</span></h3>
         <div class="formRow">
@@ -834,6 +844,31 @@ async function loadDashboard(){
 }
 
 // ===================== RUTAS / HORARIOS =====================
+async function crearRuta(){
+  const msg = document.getElementById('newRouteMsg'); msg.textContent = '';
+  const origen = document.getElementById('newRouteOrigen').value.trim();
+  const destino = document.getElementById('newRouteDestino').value.trim();
+  let code = document.getElementById('newRouteCode').value.trim();
+  if(!origen || !destino){ msg.textContent = 'Indica origen y destino.'; return; }
+  if(!code){
+    code = (origen.slice(0,3) + '-' + destino.slice(0,3)).toUpperCase().replace(/[^A-Z0-9-]/g,'');
+  }
+  const { error } = await sb.from('routes').insert({ origin: origen, destination: destino, code });
+  if(error){
+    msg.textContent = error.code === '23505' ? 'Ya existe una ruta con ese código, prueba con otro.' : error.message;
+    return;
+  }
+  document.getElementById('newRouteOrigen').value = '';
+  document.getElementById('newRouteDestino').value = '';
+  document.getElementById('newRouteCode').value = '';
+  msg.style.color = '#86efac';
+  msg.textContent = 'Ruta agregada correctamente.';
+  await loadRutas();
+}
+async function toggleRutaActiva(id, active){
+  await sb.from('routes').update({ active }).eq('id', id);
+  await loadRutas();
+}
 async function loadRutas(){
   const { data: routes } = await sb.from('routes').select('*').order('code');
   const { data: schedules } = await sb.from('route_schedules').select('*').order('departure_time');
@@ -854,7 +889,9 @@ async function loadRutas(){
         <td><button class="btn btn-danger btn-sm" onclick="deleteSchedule('${s.id}')">Eliminar</button></td>
       </tr>`).join('');
     card.innerHTML = `
-      <h3>${route.origin} → ${route.destination} <span class="sub">${route.code}</span></h3>
+      <h3>${route.origin} → ${route.destination} <span class="sub">${route.code}</span>
+        <button class="btn ${route.active?'btn-danger':'btn-ok'} btn-sm" onclick="toggleRutaActiva('${route.id}', ${!route.active})">${route.active?'Desactivar ruta':'Activar ruta'}</button>
+      </h3>
       <div class="tableWrap"><table>
         <thead><tr><th>Hora</th><th>Precio</th><th>Asientos</th><th>Días</th><th>Activo</th><th></th></tr></thead>
         <tbody>${rows || '<tr><td colspan="6" class="tag">Sin horarios configurados</td></tr>'}</tbody>
