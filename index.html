@@ -173,6 +173,13 @@ tr:last-child td{border-bottom:none}
 .expTypeBtn:hover{border-color:var(--brand)}
 .expTypeBtn.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#04101f;border-color:transparent;font-weight:600}
 .casetaBtns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+
+/* ---------- Bóveda de credenciales (master) ---------- */
+.pwCell{display:flex;align-items:center;gap:6px;font-family:monospace;font-size:12px}
+.pwCell .pwEye{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px}
+.pwCell .pwEye:hover{color:var(--text)}
+.pwSaveInline{display:flex;gap:6px;align-items:center}
+.pwSaveInline input{width:110px;padding:5px 8px;background:var(--panel2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px}
 </style>
 </head>
 <body>
@@ -364,7 +371,7 @@ tr:last-child td{border-bottom:none}
       <div class="pageSub">Administradores, vendedores y choferes</div>
       <div class="toolbar"><button class="btn btn-primary" onclick="openUserModal()">+ Nuevo usuario</button></div>
       <div class="sectionCard">
-        <div class="tableWrap"><table id="tblUsuarios"><thead><tr><th>Nombre</th><th>Empresa</th><th>Rol</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+        <div class="tableWrap"><table id="tblUsuarios"><thead id="tblUsuariosHead"><tr><th>Nombre</th><th>Empresa</th><th>Rol</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
       </div>
     </div>
 
@@ -901,24 +908,74 @@ async function generarSalidas(){
 
 // ===================== USUARIOS =====================
 async function loadUsuarios(){
+  const isMaster = currentProfile.role === 'master';
+  const head = document.getElementById('tblUsuariosHead');
+  head.innerHTML = isMaster
+    ? '<tr><th>Nombre</th><th>Empresa</th><th>Rol</th><th>Correo</th><th>Contraseña</th><th>Estado</th><th>Acciones</th></tr>'
+    : '<tr><th>Nombre</th><th>Empresa</th><th>Rol</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr>';
+
   const { data } = await sb.from('profiles').select('*, companies(name)').order('role');
+
+  let vaultByUser = {};
+  if(isMaster){
+    const { data: vault } = await sb.from('credentials_vault').select('*');
+    (vault||[]).forEach(v=>{ vaultByUser[v.user_id] = v; });
+  }
+
   const tbody = document.querySelector('#tblUsuarios tbody');
   tbody.innerHTML = '';
   (data||[]).forEach(u=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${u.full_name}</td>
-      <td>${u.companies?.name || '—'}</td>
-      <td><span class="roleTag ${u.role}">${u.role}</span></td>
-      <td>${u.phone||'—'}</td>
-      <td>${u.active? '<span class="badge paid">Activo</span>' : '<span class="badge cancelled">Inactivo</span>'}</td>
-      <td>
-        <button class="btn btn-outline btn-sm" onclick="openPwdModal('${u.id}')">Contraseña</button>
-        <button class="btn ${u.active?'btn-danger':'btn-ok'} btn-sm" onclick="toggleUserActive('${u.id}', ${!u.active})">${u.active?'Desactivar':'Activar'}</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteUsuario('${u.id}')">Eliminar</button>
-      </td>`;
+    if(isMaster){
+      const v = vaultByUser[u.id];
+      const correo = v?.email || '—';
+      const pwCell = v?.plaintext_password
+        ? `<span class="pwCell"><span class="pwText" data-real="${v.plaintext_password.replace(/"/g,'&quot;')}" data-hidden="true">••••••••</span><button type="button" class="pwEye" onclick="togglePwVisible(this)">👁</button></span>`
+        : `<span class="pwSaveInline"><input type="text" id="pwManual-${u.id}" placeholder="Escribir..."><button class="btn btn-outline btn-sm" onclick="guardarPwManual('${u.id}','${(v?.email||'').replace(/'/g,"\\'")}')">Guardar</button></span>`;
+      tr.innerHTML = `
+        <td>${u.full_name}</td>
+        <td>${u.companies?.name || '—'}</td>
+        <td><span class="roleTag ${u.role}">${u.role}</span></td>
+        <td>${correo}</td>
+        <td>${pwCell}</td>
+        <td>${u.active? '<span class="badge paid">Activo</span>' : '<span class="badge cancelled">Inactivo</span>'}</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="openPwdModal('${u.id}')">Resetear</button>
+          <button class="btn ${u.active?'btn-danger':'btn-ok'} btn-sm" onclick="toggleUserActive('${u.id}', ${!u.active})">${u.active?'Desactivar':'Activar'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUsuario('${u.id}')">Eliminar</button>
+        </td>`;
+    } else {
+      tr.innerHTML = `
+        <td>${u.full_name}</td>
+        <td>${u.companies?.name || '—'}</td>
+        <td><span class="roleTag ${u.role}">${u.role}</span></td>
+        <td>${u.phone||'—'}</td>
+        <td>${u.active? '<span class="badge paid">Activo</span>' : '<span class="badge cancelled">Inactivo</span>'}</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="openPwdModal('${u.id}')">Contraseña</button>
+          <button class="btn ${u.active?'btn-danger':'btn-ok'} btn-sm" onclick="toggleUserActive('${u.id}', ${!u.active})">${u.active?'Desactivar':'Activar'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUsuario('${u.id}')">Eliminar</button>
+        </td>`;
+    }
     tbody.appendChild(tr);
   });
+}
+function togglePwVisible(btn){
+  const span = btn.previousElementSibling;
+  const isHidden = span.getAttribute('data-hidden') === 'true';
+  span.textContent = isHidden ? span.getAttribute('data-real') : '••••••••';
+  span.setAttribute('data-hidden', isHidden ? 'false' : 'true');
+  btn.textContent = isHidden ? '🙈' : '👁';
+}
+async function guardarPwManual(userId, existingEmail){
+  const input = document.getElementById('pwManual-'+userId);
+  const pwd = input.value.trim();
+  if(!pwd){ return; }
+  const { error } = await sb.from('credentials_vault').upsert({
+    user_id: userId, email: existingEmail || null, plaintext_password: pwd, updated_at: new Date().toISOString()
+  });
+  if(error){ alert(error.message); return; }
+  await loadUsuarios();
 }
 async function openUserModal(preselectCompanyId){
   document.getElementById('userModal').classList.add('active');
@@ -1001,6 +1058,7 @@ async function confirmarResetPwd(){
     const json = await res.json();
     if(!res.ok){ msg.textContent = json.error; return; }
     closePwdModal();
+    await loadUsuarios();
   }catch(e){ msg.textContent = 'Error de conexión: ' + e.message; }
 }
 
