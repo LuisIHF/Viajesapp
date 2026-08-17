@@ -582,6 +582,10 @@ tr:last-child td{border-bottom:none}
     <div class="field"><label>Correo</label><input id="ncAdminEmail" type="email"></div>
     <div class="field"><label>Contraseña temporal</label><input id="ncAdminPassword" type="text"></div>
     <div class="field"><label>Teléfono (opcional)</label><input id="ncAdminPhone"></div>
+    <hr style="border-color:var(--border);margin:16px 0">
+    <div class="field">
+      <label><input type="checkbox" id="ncCloneTemplate" checked style="width:auto;margin-right:6px">Copiar tus rutas y horarios como punto de partida (podrán editarse después)</label>
+    </div>
     <div class="errorMsg" id="ncMsg"></div>
     <div class="modalActions">
       <button class="btn btn-outline" onclick="closeCompanyModal()">Cancelar</button>
@@ -1913,11 +1917,22 @@ async function loadEmpresas(){
       <td>${c.active? '<span class="badge paid">Activa</span>' : '<span class="badge cancelled">Inactiva</span>'}</td>
       <td>
         <button class="btn btn-outline btn-sm" onclick="verSoporteDeEmpresa('${c.id}')">Ver detalle</button>
+        <button class="btn btn-outline btn-sm" onclick="copiarRutasAEmpresa('${c.id}', '${c.name.replace(/'/g,"\\'")}')">Copiar mis rutas</button>
         <button class="btn ${c.active?'btn-danger':'btn-ok'} btn-sm" onclick="toggleCompanyActive('${c.id}', ${!c.active})">${c.active?'Desactivar':'Activar'}</button>
       </td>`;
     tbody.appendChild(tr);
   }
   if(!companies || !companies.length) tbody.innerHTML = '<tr><td colspan="6" class="tag">Aún no hay empresas registradas.</td></tr>';
+}
+const TEMPLATE_COMPANY_ID = 'f2969a74-03f0-47ee-8e87-32633a22011e';
+async function copiarRutasAEmpresa(companyId, companyName){
+  if(companyId === TEMPLATE_COMPANY_ID){ alert('Esta es la empresa plantilla.'); return; }
+  if(!confirm(`¿Copiar tus rutas y horarios a "${companyName}"? Las rutas que ya tenga con el mismo código no se duplicarán.`)) return;
+  const { data, error } = await sb.rpc('clone_template_routes', { p_source_company: TEMPLATE_COMPANY_ID, p_target_company: companyId });
+  if(error){ alert(error.message); return; }
+  alert(data > 0 ? `Se copiaron ${data} ruta(s) nueva(s) con sus horarios.` : 'Esa empresa ya tenía todas esas rutas — no se copió nada nuevo.');
+  if(document.getElementById('view-soporte').classList.contains('active')) await loadSoporte();
+  else await loadEmpresas();
 }
 async function toggleCompanyActive(id, active){
   await sb.from('companies').update({ active }).eq('id', id);
@@ -1934,6 +1949,7 @@ async function crearEmpresa(){
     admin_email: document.getElementById('ncAdminEmail').value.trim(),
     admin_password: document.getElementById('ncAdminPassword').value,
     admin_phone: document.getElementById('ncAdminPhone').value.trim(),
+    clone_template: document.getElementById('ncCloneTemplate').checked,
   };
   if(!payload.company_name || !payload.admin_full_name || !payload.admin_email || !payload.admin_password){
     msg.textContent = 'Completa todos los campos obligatorios.'; return;
@@ -1984,6 +2000,7 @@ async function loadSoporte(){
   (users||[]).forEach(u=>{ if(usersByRole[u.role]!==undefined) usersByRole[u.role]++; });
 
   let html = `
+    <div class="toolbar"><button class="btn btn-outline btn-sm" onclick="copiarRutasAEmpresa('${companyId}', '${(settings?.business_name||'esta empresa').replace(/'/g,"\\'")}')">Copiar mis rutas y horarios a esta empresa</button></div>
     <div class="grid grid-4 kpiRow" style="margin-bottom:18px">
       <div class="card statCard"><div class="label">Negocio</div><div class="value" style="font-size:16px">${settings?.business_name || '—'}</div></div>
       <div class="card statCard"><div class="label">Ventas totales</div><div class="value">${allSales.length}</div></div>
