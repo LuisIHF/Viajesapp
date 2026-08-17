@@ -341,9 +341,44 @@ tr:last-child td{border-bottom:none}
         <div class="field"><label>Teléfono</label><input id="bizPhone"></div>
         <div class="field"><label>Dirección</label><input id="bizAddress"></div>
         <div class="field"><label>Correo</label><input id="bizEmail"></div>
-        <div class="field"><label>URL del logo (opcional)</label><input id="bizLogo" placeholder="https://..."></div>
+        <div class="field">
+          <label>Logotipo</label>
+          <div style="display:flex;align-items:center;gap:14px">
+            <img id="bizLogoPreview" src="" class="hidden" style="max-height:56px;max-width:120px;border-radius:8px;background:#fff;padding:6px">
+            <input type="file" id="bizLogoFile" accept="image/*" onchange="subirLogo()">
+          </div>
+          <div class="errorMsg" id="bizLogoMsg"></div>
+        </div>
+        <input type="hidden" id="bizLogo">
         <button class="btn btn-primary" onclick="guardarNegocio()">Guardar cambios</button>
         <div class="errorMsg" id="bizMsg"></div>
+      </div>
+
+      <div class="sectionCard" style="max-width:480px">
+        <h3>Personalización visual</h3>
+        <p class="tag" style="margin-bottom:14px">Ajusta los colores y la tipografía de tu sistema a tu gusto.</p>
+        <div class="formRow">
+          <div class="field"><label>Color de fondo</label><input type="color" id="themeBg" style="height:40px;padding:4px"></div>
+          <div class="field"><label>Color principal de botones</label><input type="color" id="themeAccent1" style="height:40px;padding:4px"></div>
+          <div class="field"><label>Color secundario (degradado)</label><input type="color" id="themeAccent2" style="height:40px;padding:4px"></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Tipografía</label>
+          <select id="themeFont">
+            <option value="">Predeterminada</option>
+            <option value="Inter">Inter</option>
+            <option value="Roboto">Roboto</option>
+            <option value="Poppins">Poppins</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Georgia, serif">Georgia (clásica)</option>
+            <option value="'Courier New', monospace">Courier New (monoespaciada)</option>
+          </select>
+        </div>
+        <div class="formRow" style="margin-top:16px">
+          <button class="btn btn-primary" onclick="guardarTema()">Guardar personalización</button>
+          <button class="btn btn-outline" onclick="restablecerTema()">Restablecer a lo predeterminado</button>
+        </div>
+        <div class="errorMsg" id="themeMsg"></div>
       </div>
     </div>
 
@@ -676,7 +711,7 @@ async function afterLogin(){
   const tag = document.getElementById('userRoleTag');
   tag.textContent = profile.role;
   tag.className = 'roleTag ' + profile.role;
-  if(profile.role !== 'master') await loadBusinessSettings();
+  if(profile.role !== 'master'){ await loadBusinessSettings(); applyTheme(businessSettings); }
   goToView(NAV[profile.role][0].id);
 }
 
@@ -736,6 +771,32 @@ async function loadBusinessSettings(){
   const { data } = await sb.from('business_settings').select('*').maybeSingle();
   businessSettings = data;
 }
+const DEFAULT_THEME = { bg:'#0b1220', accent1:'#2f8fff', accent2:'#22d3c5', font:'' };
+const DEFAULT_FONT_STACK = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+const GOOGLE_FONTS = ['Inter','Roboto','Poppins','Montserrat'];
+let loadedGoogleFonts = new Set();
+
+function applyTheme(settings){
+  const bg = settings?.theme_bg_color || DEFAULT_THEME.bg;
+  const accent1 = settings?.theme_accent1 || DEFAULT_THEME.accent1;
+  const accent2 = settings?.theme_accent2 || DEFAULT_THEME.accent2;
+  const font = settings?.theme_font || '';
+  const root = document.documentElement;
+  root.style.setProperty('--bg', bg);
+  root.style.setProperty('--brand', accent1);
+  root.style.setProperty('--brand2', accent2);
+  document.body.style.background = `linear-gradient(180deg, ${bg}, ${bg})`;
+
+  if(font && GOOGLE_FONTS.includes(font) && !loadedGoogleFonts.has(font)){
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${font.replace(/ /g,'+')}:wght@400;500;600;700&display=swap`;
+    document.head.appendChild(link);
+    loadedGoogleFonts.add(font);
+  }
+  document.body.style.fontFamily = font ? `'${font}', ${DEFAULT_FONT_STACK}` : DEFAULT_FONT_STACK;
+}
+
 async function loadNegocioForm(){
   await loadBusinessSettings();
   if(businessSettings){
@@ -744,7 +805,35 @@ async function loadNegocioForm(){
     document.getElementById('bizAddress').value = businessSettings.address || '';
     document.getElementById('bizEmail').value = businessSettings.email || '';
     document.getElementById('bizLogo').value = businessSettings.logo_url || '';
+    const preview = document.getElementById('bizLogoPreview');
+    if(businessSettings.logo_url){ preview.src = businessSettings.logo_url; preview.classList.remove('hidden'); }
+    else { preview.classList.add('hidden'); }
+
+    document.getElementById('themeBg').value = businessSettings.theme_bg_color || DEFAULT_THEME.bg;
+    document.getElementById('themeAccent1').value = businessSettings.theme_accent1 || DEFAULT_THEME.accent1;
+    document.getElementById('themeAccent2').value = businessSettings.theme_accent2 || DEFAULT_THEME.accent2;
+    document.getElementById('themeFont').value = businessSettings.theme_font || '';
   }
+}
+async function subirLogo(){
+  const fileInput = document.getElementById('bizLogoFile');
+  const file = fileInput.files[0];
+  const msg = document.getElementById('bizLogoMsg'); msg.textContent = '';
+  if(!file) return;
+  if(file.size > 2 * 1024 * 1024){ msg.textContent = 'La imagen no debe superar 2 MB.'; return; }
+  msg.style.color = 'var(--muted)';
+  msg.textContent = 'Subiendo...';
+  const ext = file.name.split('.').pop();
+  const path = `${currentProfile.company_id}/logo-${Date.now()}.${ext}`;
+  const { error: uploadError } = await sb.storage.from('logos').upload(path, file, { upsert: true });
+  if(uploadError){ msg.textContent = uploadError.message; return; }
+  const { data: pub } = sb.storage.from('logos').getPublicUrl(path);
+  document.getElementById('bizLogo').value = pub.publicUrl;
+  const preview = document.getElementById('bizLogoPreview');
+  preview.src = pub.publicUrl;
+  preview.classList.remove('hidden');
+  msg.style.color = '#86efac';
+  msg.textContent = 'Imagen cargada. No olvides "Guardar cambios" para confirmarla.';
 }
 async function guardarNegocio(){
   const payload = {
@@ -759,6 +848,27 @@ async function guardarNegocio(){
   msg.style.color = error ? '#fca5a5' : '#86efac';
   msg.textContent = error ? error.message : 'Guardado correctamente.';
   await loadBusinessSettings();
+}
+async function guardarTema(){
+  const payload = {
+    theme_bg_color: document.getElementById('themeBg').value,
+    theme_accent1: document.getElementById('themeAccent1').value,
+    theme_accent2: document.getElementById('themeAccent2').value,
+    theme_font: document.getElementById('themeFont').value || null,
+  };
+  const { error } = await sb.from('business_settings').update(payload).eq('company_id', currentProfile.company_id);
+  const msg = document.getElementById('themeMsg');
+  msg.style.color = error ? '#fca5a5' : '#86efac';
+  msg.textContent = error ? error.message : 'Personalización guardada.';
+  await loadBusinessSettings();
+  applyTheme(businessSettings);
+}
+async function restablecerTema(){
+  document.getElementById('themeBg').value = DEFAULT_THEME.bg;
+  document.getElementById('themeAccent1').value = DEFAULT_THEME.accent1;
+  document.getElementById('themeAccent2').value = DEFAULT_THEME.accent2;
+  document.getElementById('themeFont').value = '';
+  await guardarTema();
 }
 
 // ===================== RECORDATORIOS WHATSAPP =====================
