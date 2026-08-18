@@ -49,9 +49,27 @@ input,select,textarea{font-family:inherit}
 .sidebar{width:230px;background:var(--panel);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;gap:4px}
 .brand{display:flex;align-items:center;gap:10px;padding:8px 10px 20px;font-weight:700;font-size:16px}
 .brand .logoDot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
-.brand{overflow:hidden}
-.brand span.brandName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand img.brandLogo{height:26px;max-width:150px;object-fit:contain;border-radius:4px}
+.brand{overflow:hidden;gap:12px}
+.brand span.brandName{
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:linear-gradient(90deg,var(--brand),var(--brand2),var(--brand));
+  background-size:200% auto;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:brandShimmer 5s linear infinite;
+}
+@keyframes brandShimmer{
+  0%{background-position:0% center}
+  100%{background-position:200% center}
+}
+.brand img.brandLogo{
+  height:44px;max-width:180px;object-fit:contain;border-radius:10px;
+  border:2px solid var(--brand);padding:2px;background:#0b1220;
+  animation:logoGlow 3s ease-in-out infinite;
+}
+@keyframes logoGlow{
+  0%,100%{box-shadow:0 0 5px 0 var(--brand);border-color:var(--brand)}
+  50%{box-shadow:0 0 14px 3px var(--brand2);border-color:var(--brand2)}
+}
 .navBtn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--muted);background:transparent;border:none;text-align:left;font-size:14px;font-weight:500}
 .navBtn:hover{background:var(--panel2);color:var(--text)}
 .navBtn.active{background:rgba(47,143,255,.15);color:var(--brand)}
@@ -366,7 +384,7 @@ tr:last-child td{border-bottom:none}
           <div class="field"><label>Color secundario (degradado)</label><input type="color" id="themeAccent2" style="height:40px;padding:4px"></div>
         </div>
         <div class="field" style="margin-top:10px">
-          <label>Tipografía</label>
+          <label>Tipografía general de la página</label>
           <select id="themeFont">
             <option value="">Predeterminada</option>
             <option value="Inter">Inter</option>
@@ -375,6 +393,19 @@ tr:last-child td{border-bottom:none}
             <option value="Montserrat">Montserrat</option>
             <option value="Georgia, serif">Georgia (clásica)</option>
             <option value="'Courier New', monospace">Courier New (monoespaciada)</option>
+          </select>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Tipografía del nombre de la empresa (menú lateral)</label>
+          <select id="themeBrandFont">
+            <option value="">Igual que la tipografía general</option>
+            <option value="Inter">Inter</option>
+            <option value="Poppins">Poppins</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Playfair Display">Playfair Display (elegante)</option>
+            <option value="Pacifico">Pacifico (manuscrita)</option>
+            <option value="Bebas Neue">Bebas Neue (impacto)</option>
+            <option value="Righteous">Righteous (moderna)</option>
           </select>
         </div>
         <div class="formRow" style="margin-top:16px">
@@ -775,11 +806,24 @@ async function loadBusinessSettings(){
   const { data } = await sb.from('business_settings').select('*').maybeSingle();
   businessSettings = data;
 }
-const DEFAULT_THEME = { bg:'#0b1220', accent1:'#2f8fff', accent2:'#22d3c5', font:'' };
+const DEFAULT_THEME = { bg:'#0b1220', accent1:'#2f8fff', accent2:'#22d3c5', font:'', brandFont:'' };
 const DEFAULT_FONT_STACK = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
-const GOOGLE_FONTS = ['Inter','Roboto','Poppins','Montserrat'];
+const NATIVE_FONTS = ["Georgia, serif", "'Courier New', monospace"];
 let loadedGoogleFonts = new Set();
 
+function ensureFontLoaded(font){
+  if(!font || NATIVE_FONTS.includes(font) || loadedGoogleFonts.has(font)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${font.replace(/ /g,'+')}:wght@400;500;600;700&display=swap`;
+  document.head.appendChild(link);
+  loadedGoogleFonts.add(font);
+}
+function fontFamilyValue(font){
+  if(!font) return DEFAULT_FONT_STACK;
+  if(font.includes(',')) return font; // ya viene completo, ej. "Georgia, serif"
+  return `'${font}', ${DEFAULT_FONT_STACK}`;
+}
 function applyTheme(settings){
   const bg = settings?.theme_bg_color || DEFAULT_THEME.bg;
   const accent1 = settings?.theme_accent1 || DEFAULT_THEME.accent1;
@@ -791,23 +835,20 @@ function applyTheme(settings){
   root.style.setProperty('--brand2', accent2);
   document.body.style.background = `linear-gradient(180deg, ${bg}, ${bg})`;
 
-  if(font && GOOGLE_FONTS.includes(font) && !loadedGoogleFonts.has(font)){
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = `https://fonts.googleapis.com/css2?family=${font.replace(/ /g,'+')}:wght@400;500;600;700&display=swap`;
-    document.head.appendChild(link);
-    loadedGoogleFonts.add(font);
-  }
-  document.body.style.fontFamily = font ? `'${font}', ${DEFAULT_FONT_STACK}` : DEFAULT_FONT_STACK;
+  ensureFontLoaded(font);
+  document.body.style.fontFamily = fontFamilyValue(font);
 }
 function updateBrandDisplay(settings){
   const box = document.getElementById('brandBox');
   if(!box) return;
   const name = settings?.business_name || 'ViajesApp';
+  const brandFont = settings?.theme_brand_font || '';
+  ensureFontLoaded(brandFont);
+  const brandFontCss = fontFamilyValue(brandFont);
   if(settings?.logo_url){
-    box.innerHTML = `<img class="brandLogo" src="${settings.logo_url}" alt="${name}"><span class="brandName">${name}</span>`;
+    box.innerHTML = `<img class="brandLogo" src="${settings.logo_url}" alt="${name}"><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`;
   } else {
-    box.innerHTML = `<span class="logoDot"></span><span class="brandName">${name}</span>`;
+    box.innerHTML = `<span class="logoDot"></span><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`;
   }
 }
 
@@ -827,6 +868,7 @@ async function loadNegocioForm(){
     document.getElementById('themeAccent1').value = businessSettings.theme_accent1 || DEFAULT_THEME.accent1;
     document.getElementById('themeAccent2').value = businessSettings.theme_accent2 || DEFAULT_THEME.accent2;
     document.getElementById('themeFont').value = businessSettings.theme_font || '';
+    document.getElementById('themeBrandFont').value = businessSettings.theme_brand_font || '';
   }
 }
 async function subirLogo(){
@@ -870,6 +912,7 @@ async function guardarTema(){
     theme_accent1: document.getElementById('themeAccent1').value,
     theme_accent2: document.getElementById('themeAccent2').value,
     theme_font: document.getElementById('themeFont').value || null,
+    theme_brand_font: document.getElementById('themeBrandFont').value || null,
   };
   const { error } = await sb.from('business_settings').update(payload).eq('company_id', currentProfile.company_id);
   const msg = document.getElementById('themeMsg');
@@ -884,6 +927,7 @@ async function restablecerTema(){
   document.getElementById('themeAccent1').value = DEFAULT_THEME.accent1;
   document.getElementById('themeAccent2').value = DEFAULT_THEME.accent2;
   document.getElementById('themeFont').value = '';
+  document.getElementById('themeBrandFont').value = '';
   await guardarTema();
 }
 
