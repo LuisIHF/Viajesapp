@@ -2,7 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220" id="themeColorMeta">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
 <title>ViajesApp · Sistema de Boletaje</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -28,6 +32,17 @@ input,select,textarea{font-family:inherit}
 .loginCard h1{font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
 .loginCard .logoDot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
 .loginCard p.sub{color:var(--muted);margin:0 0 24px;font-size:13px}
+#loginBrand{display:flex;align-items:center;gap:10px;transition:.2s}
+#loginBrand .brandName{
+  background:linear-gradient(90deg,var(--brand),var(--brand2),var(--brand));
+  background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:brandShimmer 5s linear infinite;
+}
+#loginBrand img.brandLogo{
+  height:40px;max-width:160px;object-fit:contain;border-radius:10px;
+  border:2px solid var(--brand);padding:2px;background:#0b1220;
+  animation:logoGlow 3s ease-in-out infinite;
+}
 .field{margin-bottom:14px}
 .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
 .field input, .field select, .field textarea{width:100%;padding:10px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px}
@@ -144,13 +159,51 @@ tr:last-child td{border-bottom:none}
 .iconBtn{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 10px;font-size:13px}
 .seatBar{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden;margin-top:6px}
 .seatBar div{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+
+/* ---------- Barra superior móvil (marca + salir) ---------- */
 .mobileTopbar{display:none}
+.mobileTopbar .brand{padding:0;margin:0;flex:1;min-width:0}
+.mobileTopbar .brand img.brandLogo{height:34px}
+.mobileLogoutBtn{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 12px;font-size:12px;white-space:nowrap;flex-shrink:0}
+
 @media(max-width:800px){
+  html{-webkit-text-size-adjust:100%}
   #appShell.active{flex-direction:column}
-  .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:10px;border-right:none;border-bottom:1px solid var(--border)}
+
+  /* Barra superior fija con marca de la empresa + botón de salir */
+  .mobileTopbar{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    position:sticky;top:0;z-index:45;background:var(--panel);border-bottom:1px solid var(--border);
+    padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));
+  }
+
+  /* Barra inferior de navegación, estilo app nativa */
+  .sidebar{
+    position:fixed;left:0;right:0;bottom:0;width:100%;z-index:40;
+    flex-direction:row;justify-content:space-around;align-items:stretch;
+    overflow-x:auto;gap:2px;
+    padding:6px env(safe-area-inset-right) calc(6px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+    border-right:none;border-top:1px solid var(--border);border-bottom:none;
+    box-shadow:0 -4px 16px rgba(0,0,0,.25);
+  }
   .sidebar .brand,.sidebar .userBox,.sidebar .spacer{display:none}
-  .navBtn{white-space:nowrap}
-  .mainArea{padding:16px}
+  .navBtn{
+    flex:1 1 0;min-width:0;flex-direction:column;gap:2px;
+    padding:8px 2px;font-size:10.5px;text-align:center;white-space:nowrap;
+    min-height:52px;justify-content:center;
+  }
+  .navBtn .navIcon{font-size:19px;line-height:1}
+
+  .mainArea{padding:14px 14px calc(84px + env(safe-area-inset-bottom))}
+
+  /* Objetivos táctiles más grandes y sin zoom automático de iOS en inputs */
+  .btn{min-height:44px}
+  .btn-sm{min-height:36px}
+  .field input,.field select,.field textarea{font-size:16px;padding:12px}
+  .seatBtn{width:44px;height:44px}
+  .capBtn,.expTypeBtn{min-height:40px}
+  .modalCard{max-width:94vw}
+  .toolbar,.formRow{gap:10px}
 }
 
 /* ---------- Monitoreo / GPS ---------- */
@@ -207,12 +260,12 @@ tr:last-child td{border-bottom:none}
 
 <!-- ===================== LOGIN ===================== -->
 <div id="loginScreen">
-  <div class="loginCard">
-    <h1><span class="logoDot"></span> ViajesApp</h1>
+  <div class="loginCard" id="loginCard">
+    <h1 id="loginBrand"><span class="logoDot"></span> <span class="brandName">ViajesApp</span></h1>
     <p class="sub">Sistema de boletaje y control de rutas</p>
     <div class="field">
       <label>Correo electrónico</label>
-      <input type="email" id="loginEmail" placeholder="usuario@viajesapp.mx" autocomplete="username">
+      <input type="email" id="loginEmail" placeholder="usuario@viajesapp.mx" autocomplete="username" onblur="detectarEmpresaLogin()">
     </div>
     <div class="field">
       <label>Contraseña</label>
@@ -225,6 +278,10 @@ tr:last-child td{border-bottom:none}
 
 <!-- ===================== APP SHELL ===================== -->
 <div id="appShell">
+  <div class="mobileTopbar">
+    <div class="brand" id="brandBoxMobile"><span class="logoDot"></span> <span class="brandName">ViajesApp</span></div>
+    <button class="mobileLogoutBtn" onclick="doLogout()">Salir</button>
+  </div>
   <div class="sidebar">
     <div class="brand" id="brandBox"><span class="logoDot"></span> ViajesApp</div>
     <div id="navButtons"></div>
@@ -707,6 +764,35 @@ const NAV = {
 };
 
 // ===================== AUTH =====================
+let loginBrandDebounce = null;
+async function detectarEmpresaLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  if(!email || !email.includes('@')){ setLoginBrand(null); return; }
+  clearTimeout(loginBrandDebounce);
+  loginBrandDebounce = setTimeout(async ()=>{
+    try{
+      const res = await fetch(SUPABASE_URL + '/functions/v1/login-branding', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email })
+      });
+      const json = await res.json();
+      setLoginBrand(json.branding);
+    }catch(e){ setLoginBrand(null); }
+  }, 150);
+}
+function setLoginBrand(settings){
+  const name = settings?.business_name || 'ViajesApp';
+  const brandFont = settings?.theme_brand_font || '';
+  ensureFontLoaded(brandFont);
+  const brandFontCss = fontFamilyValue(brandFont);
+  const html = settings?.logo_url
+    ? `<img class="brandLogo" src="${settings.logo_url}" alt="${name}"><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`
+    : `<span class="logoDot"></span><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`;
+  document.getElementById('loginBrand').innerHTML = html;
+  const root = document.documentElement;
+  root.style.setProperty('--brand', settings?.theme_accent1 || DEFAULT_THEME.accent1);
+  root.style.setProperty('--brand2', settings?.theme_accent2 || DEFAULT_THEME.accent2);
+}
 async function doLogin(){
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -746,7 +832,7 @@ async function afterLogin(){
   tag.textContent = profile.role;
   tag.className = 'roleTag ' + profile.role;
   if(profile.role !== 'master'){ await loadBusinessSettings(); applyTheme(businessSettings); updateBrandDisplay(businessSettings); }
-  else { updateBrandDisplay(null); }
+  else { applyTheme(null); updateBrandDisplay(null); }
   goToView(NAV[profile.role][0].id);
 }
 
@@ -758,12 +844,20 @@ async function doLogout(){
 }
 
 // ===================== NAV =====================
+const NAV_ICONS = {
+  empresas:'🏢', usuarios:'👤', soporte:'🛟',
+  dashboard:'📊', monitoreo:'📍', agenda:'🎟️', historial:'📈', rutas:'🛣️',
+  negocio:'🏬', whatsapp:'💬', reportes:'📄', buscar:'💳',
+  venta:'🎫', especiales:'⭐',
+  checkin:'✅', pasajeros:'👥', gastos:'⛽',
+};
 function buildNav(){
   const wrap = document.getElementById('navButtons');
   wrap.innerHTML = '';
   NAV[currentProfile.role].forEach(item=>{
     const b = document.createElement('button');
-    b.className = 'navBtn'; b.id = 'nav-'+item.id; b.textContent = item.label;
+    b.className = 'navBtn'; b.id = 'nav-'+item.id;
+    b.innerHTML = `<span class="navIcon">${NAV_ICONS[item.id]||'•'}</span><span>${item.label}</span>`;
     b.onclick = ()=>goToView(item.id);
     wrap.appendChild(b);
   });
@@ -839,17 +933,19 @@ function applyTheme(settings){
   document.body.style.fontFamily = fontFamilyValue(font);
 }
 function updateBrandDisplay(settings){
-  const box = document.getElementById('brandBox');
-  if(!box) return;
   const name = settings?.business_name || 'ViajesApp';
   const brandFont = settings?.theme_brand_font || '';
   ensureFontLoaded(brandFont);
   const brandFontCss = fontFamilyValue(brandFont);
-  if(settings?.logo_url){
-    box.innerHTML = `<img class="brandLogo" src="${settings.logo_url}" alt="${name}"><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`;
-  } else {
-    box.innerHTML = `<span class="logoDot"></span><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`;
-  }
+  const html = settings?.logo_url
+    ? `<img class="brandLogo" src="${settings.logo_url}" alt="${name}"><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`
+    : `<span class="logoDot"></span><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`;
+  ['brandBox','brandBoxMobile'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = html;
+  });
+  const themeColorMeta = document.getElementById('themeColorMeta');
+  if(themeColorMeta) themeColorMeta.setAttribute('content', settings?.theme_bg_color || DEFAULT_THEME.bg);
 }
 
 async function loadNegocioForm(){
