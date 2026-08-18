@@ -49,6 +49,9 @@ input,select,textarea{font-family:inherit}
 .sidebar{width:230px;background:var(--panel);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;gap:4px}
 .brand{display:flex;align-items:center;gap:10px;padding:8px 10px 20px;font-weight:700;font-size:16px}
 .brand .logoDot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+.brand{overflow:hidden}
+.brand span.brandName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand img.brandLogo{height:26px;max-width:150px;object-fit:contain;border-radius:4px}
 .navBtn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--muted);background:transparent;border:none;text-align:left;font-size:14px;font-weight:500}
 .navBtn:hover{background:var(--panel2);color:var(--text)}
 .navBtn.active{background:rgba(47,143,255,.15);color:var(--brand)}
@@ -205,7 +208,7 @@ tr:last-child td{border-bottom:none}
 <!-- ===================== APP SHELL ===================== -->
 <div id="appShell">
   <div class="sidebar">
-    <div class="brand"><span class="logoDot"></span> ViajesApp</div>
+    <div class="brand" id="brandBox"><span class="logoDot"></span> ViajesApp</div>
     <div id="navButtons"></div>
     <div class="spacer"></div>
     <div class="userBox">
@@ -711,7 +714,8 @@ async function afterLogin(){
   const tag = document.getElementById('userRoleTag');
   tag.textContent = profile.role;
   tag.className = 'roleTag ' + profile.role;
-  if(profile.role !== 'master'){ await loadBusinessSettings(); applyTheme(businessSettings); }
+  if(profile.role !== 'master'){ await loadBusinessSettings(); applyTheme(businessSettings); updateBrandDisplay(businessSettings); }
+  else { updateBrandDisplay(null); }
   goToView(NAV[profile.role][0].id);
 }
 
@@ -796,6 +800,16 @@ function applyTheme(settings){
   }
   document.body.style.fontFamily = font ? `'${font}', ${DEFAULT_FONT_STACK}` : DEFAULT_FONT_STACK;
 }
+function updateBrandDisplay(settings){
+  const box = document.getElementById('brandBox');
+  if(!box) return;
+  const name = settings?.business_name || 'ViajesApp';
+  if(settings?.logo_url){
+    box.innerHTML = `<img class="brandLogo" src="${settings.logo_url}" alt="${name}"><span class="brandName">${name}</span>`;
+  } else {
+    box.innerHTML = `<span class="logoDot"></span><span class="brandName">${name}</span>`;
+  }
+}
 
 async function loadNegocioForm(){
   await loadBusinessSettings();
@@ -848,6 +862,7 @@ async function guardarNegocio(){
   msg.style.color = error ? '#fca5a5' : '#86efac';
   msg.textContent = error ? error.message : 'Guardado correctamente.';
   await loadBusinessSettings();
+  updateBrandDisplay(businessSettings);
 }
 async function guardarTema(){
   const payload = {
@@ -862,6 +877,7 @@ async function guardarTema(){
   msg.textContent = error ? error.message : 'Personalización guardada.';
   await loadBusinessSettings();
   applyTheme(businessSettings);
+  updateBrandDisplay(businessSettings);
 }
 async function restablecerTema(){
   document.getElementById('themeBg').value = DEFAULT_THEME.bg;
