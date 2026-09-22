@@ -26,7 +26,6 @@ a{color:var(--brand)}
 button{cursor:pointer;font-family:inherit}
 input,select,textarea{font-family:inherit}
 
-/* ---------- Login ---------- */
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
 .loginCard{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:32px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
 .loginCard h1{font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
@@ -58,7 +57,6 @@ input,select,textarea{font-family:inherit}
 .errorMsg{color:#fca5a5;font-size:13px;margin-top:10px;min-height:16px}
 .hintMsg{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.5}
 
-/* ---------- App shell ---------- */
 #appShell{display:none;min-height:100vh}
 #appShell.active{display:flex}
 .sidebar{width:230px;background:var(--panel);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;gap:4px}
@@ -102,7 +100,6 @@ input,select,textarea{font-family:inherit}
 .view{display:none}
 .view.active{display:block}
 
-/* ---------- Cards / grids ---------- */
 .grid{display:grid;gap:16px}
 .grid-4{grid-template-columns:repeat(4,1fr)}
 .grid-3{grid-template-columns:repeat(3,1fr)}
@@ -140,7 +137,6 @@ tr:last-child td{border-bottom:none}
 .modalCard h3{margin-top:0}
 .modalActions{display:flex;gap:10px;justify-content:end;margin-top:18px}
 
-/* ticket */
 .ticket{background:#fff;color:#111;border-radius:10px;padding:22px;max-width:380px;margin:0 auto;font-family:monospace}
 .ticket h2{margin:0 0 2px;font-size:16px}
 .ticket .folio{font-size:13px;color:#555;margin-bottom:12px}
@@ -160,7 +156,6 @@ tr:last-child td{border-bottom:none}
 .seatBar{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden;margin-top:6px}
 .seatBar div{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2))}
 
-/* ---------- Barra superior móvil (marca + salir) ---------- */
 .mobileTopbar{display:none}
 .mobileTopbar .brand{padding:0;margin:0;flex:1;min-width:0}
 .mobileTopbar .brand img.brandLogo{height:34px}
@@ -169,13 +164,11 @@ tr:last-child td{border-bottom:none}
 @media(max-width:800px){
   html{-webkit-text-size-adjust:100%}
   #appShell.active{flex-direction:column}
-
   .mobileTopbar{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
     position:sticky;top:0;z-index:45;background:var(--panel);border-bottom:1px solid var(--border);
     padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));
   }
-
   .sidebar{
     position:fixed;left:0;right:0;bottom:0;width:100%;z-index:40;
     flex-direction:row;justify-content:space-around;align-items:stretch;
@@ -191,9 +184,7 @@ tr:last-child td{border-bottom:none}
     min-height:52px;justify-content:center;
   }
   .navBtn .navIcon{font-size:19px;line-height:1}
-
   .mainArea{padding:14px 14px calc(84px + env(safe-area-inset-bottom))}
-
   .btn{min-height:44px}
   .btn-sm{min-height:36px}
   .field input,.field select,.field textarea{font-size:16px;padding:12px}
@@ -203,7 +194,6 @@ tr:last-child td{border-bottom:none}
   .toolbar,.formRow{gap:10px}
 }
 
-/* ---------- Monitoreo / GPS ---------- */
 #liveMap{width:100%;height:380px;border-radius:var(--radius);border:1px solid var(--border);background:#0e1626}
 .leaflet-popup-content-wrapper{background:var(--panel);color:var(--text);border-radius:8px}
 .leaflet-popup-tip{background:var(--panel)}
@@ -218,7 +208,6 @@ tr:last-child td{border-bottom:none}
 .kpiRow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
 .gpsStatus{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:8px}
 
-/* ---------- Mapa de asientos ---------- */
 .seatMapWrap{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;margin:14px 0}
 .seatMap{display:flex;flex-direction:column;gap:8px}
 .seatMap .driverRow{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
@@ -238,14 +227,12 @@ tr:last-child td{border-bottom:none}
 .capBtn{padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer}
 .capBtn:hover{border-color:var(--brand)}
 
-/* ---------- Gastos del viaje ---------- */
 .expenseTypeBtns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .expTypeBtn{padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
 .expTypeBtn:hover{border-color:var(--brand)}
 .expTypeBtn.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#04101f;border-color:transparent;font-weight:600}
 .casetaBtns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 
-/* ---------- Bóveda de credenciales (master) ---------- */
 .pwCell{display:flex;align-items:center;gap:6px;font-family:monospace;font-size:12px}
 .pwCell .pwEye{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px}
 .pwCell .pwEye:hover{color:var(--text)}
@@ -255,7 +242,6 @@ tr:last-child td{border-bottom:none}
 </head>
 <body>
 
-<!-- ===================== LOGIN ===================== -->
 <div id="loginScreen">
   <div class="loginCard" id="loginCard">
     <h1 id="loginBrand"><span class="logoDot"></span> <span class="brandName">ViajesApp</span></h1>
@@ -273,7 +259,6 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- ===================== APP SHELL ===================== -->
 <div id="appShell">
   <div class="mobileTopbar">
     <div class="brand" id="brandBoxMobile"><span class="logoDot"></span> <span class="brandName">ViajesApp</span></div>
@@ -293,7 +278,6 @@ tr:last-child td{border-bottom:none}
 
   <div class="mainArea">
 
-    <!-- ============ MASTER: EMPRESAS ============ -->
     <div class="view" id="view-empresas">
       <div class="pageTitle">Empresas</div>
       <div class="pageSub">Clientes independientes que usan el sistema, cada uno con su propia línea de transporte</div>
@@ -303,7 +287,6 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- ============ MASTER: SOPORTE / HISTORIAL ============ -->
     <div class="view" id="view-soporte">
       <div class="pageTitle">Soporte / Historial por empresa</div>
       <div class="pageSub">Consulta la operación de cualquier empresa cliente para apoyarla en caso de dudas o incidencias</div>
@@ -313,7 +296,6 @@ tr:last-child td{border-bottom:none}
       <div id="soporteContent"><p class="tag">Selecciona una empresa para ver su información.</p></div>
     </div>
 
-    <!-- ============ ADMIN: DASHBOARD ============ -->
     <div class="view" id="view-dashboard">
       <div class="pageTitle">Panel general</div>
       <div class="pageSub">Resumen de operación de hoy</div>
@@ -329,28 +311,23 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- ============ ADMIN/VENDEDOR: MONITOREO EN VIVO ============ -->
     <div class="view" id="view-monitoreo">
       <div class="pageTitle">Monitoreo en vivo</div>
       <div class="pageSub">Aprueba salidas y sigue el trayecto de cada unidad en tiempo real</div>
-
       <div class="sectionCard">
         <h3>Solicitudes de salida pendientes <span class="sub" id="pendingCount"></span></h3>
         <div id="pendingList"><p class="tag">No hay solicitudes pendientes.</p></div>
       </div>
-
       <div class="sectionCard">
         <h3>Viajes en curso <span class="sub" id="activeTripsCount"></span></h3>
         <div id="activeTripsList"><p class="tag">No hay viajes en curso.</p></div>
       </div>
-
       <div class="sectionCard">
         <h3>Mapa en vivo <span class="sub" id="mapUpdatedAt"></span></h3>
         <div id="liveMap"></div>
       </div>
     </div>
 
-    <!-- ============ ADMIN: HISTORIAL Y ESTADÍSTICAS ============ -->
     <div class="view" id="view-historial">
       <div class="pageTitle">Historial y estadísticas</div>
       <div class="pageSub">Datos históricos de ventas, ocupación y viajes</div>
@@ -383,7 +360,6 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- ============ ADMIN: RUTAS Y PRECIOS ============ -->
     <div class="view" id="view-rutas">
       <div class="pageTitle">Rutas, horarios y precios</div>
       <div class="pageSub">Configura tus rutas, sus horarios recurrentes y genera las salidas del calendario</div>
@@ -407,7 +383,6 @@ tr:last-child td{border-bottom:none}
       <div id="rutasContainer"></div>
     </div>
 
-    <!-- ============ ADMIN: NEGOCIO ============ -->
     <div class="view" id="view-negocio">
       <div class="pageTitle">Datos del negocio</div>
       <div class="pageSub">Esta información aparece en los tickets digitales</div>
@@ -418,4 +393,1909 @@ tr:last-child td{border-bottom:none}
         <div class="field"><label>Correo</label><input id="bizEmail"></div>
         <div class="field">
           <label>Logotipo</label>
-          <div style="display:flex;align-items
+          <div style="display:flex;align-items:center;gap:14px">
+            <img id="bizLogoPreview" src="" class="hidden" style="max-height:56px;max-width:120px;border-radius:8px;background:#fff;padding:6px">
+            <input type="file" id="bizLogoFile" accept="image/*" onchange="subirLogo()">
+          </div>
+          <div class="errorMsg" id="bizLogoMsg"></div>
+        </div>
+        <input type="hidden" id="bizLogo">
+        <button class="btn btn-primary" onclick="guardarNegocio()">Guardar cambios</button>
+        <div class="errorMsg" id="bizMsg"></div>
+      </div>
+
+      <div class="sectionCard" style="max-width:480px">
+        <h3>Personalización visual</h3>
+        <p class="tag" style="margin-bottom:14px">Ajusta los colores y la tipografía de tu sistema a tu gusto.</p>
+        <div class="formRow">
+          <div class="field"><label>Color de fondo</label><input type="color" id="themeBg" style="height:40px;padding:4px"></div>
+          <div class="field"><label>Color principal de botones</label><input type="color" id="themeAccent1" style="height:40px;padding:4px"></div>
+          <div class="field"><label>Color secundario (degradado)</label><input type="color" id="themeAccent2" style="height:40px;padding:4px"></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Tipografía general de la página</label>
+          <select id="themeFont">
+            <option value="">Predeterminada</option>
+            <option value="Inter">Inter</option>
+            <option value="Roboto">Roboto</option>
+            <option value="Poppins">Poppins</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Georgia, serif">Georgia (clásica)</option>
+            <option value="'Courier New', monospace">Courier New (monoespaciada)</option>
+          </select>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Tipografía del nombre de la empresa (menú lateral)</label>
+          <select id="themeBrandFont">
+            <option value="">Igual que la tipografía general</option>
+            <option value="Inter">Inter</option>
+            <option value="Poppins">Poppins</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Playfair Display">Playfair Display (elegante)</option>
+            <option value="Pacifico">Pacifico (manuscrita)</option>
+            <option value="Bebas Neue">Bebas Neue (impacto)</option>
+            <option value="Righteous">Righteous (moderna)</option>
+          </select>
+        </div>
+        <div class="formRow" style="margin-top:16px">
+          <button class="btn btn-primary" onclick="guardarTema()">Guardar personalización</button>
+          <button class="btn btn-outline" onclick="restablecerTema()">Restablecer a lo predeterminado</button>
+        </div>
+        <div class="errorMsg" id="themeMsg"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-whatsapp">
+      <div class="pageTitle">Recordatorios por WhatsApp</div>
+      <div class="pageSub">Envía un WhatsApp automático a cada pasajero antes de su viaje, vía Twilio</div>
+      <div class="sectionCard" style="max-width:520px">
+        <div id="waStatusBox" class="tag" style="margin-bottom:14px"></div>
+        <p class="tag" style="margin-bottom:14px">Requiere una cuenta de Twilio con WhatsApp habilitado — <a href="https://www.twilio.com/whatsapp" target="_blank" rel="noopener">más información aquí</a>. El envío automático corre cada 5 minutos revisando quién sale pronto.</p>
+        <div class="field">
+          <label><input type="checkbox" id="waEnabled" style="width:auto;margin-right:6px">Activar recordatorios automáticos</label>
+        </div>
+        <div class="field"><label>Minutos antes de la salida</label><input type="number" id="waMinutes" value="30" min="5" max="180"></div>
+        <div class="field"><label>Twilio Account SID</label><input id="waSid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
+        <div class="field"><label>Twilio Auth Token</label><input id="waToken" type="password" placeholder="••••••••••••••••"></div>
+        <div class="field"><label>Número de WhatsApp remitente (Twilio)</label><input id="waFrom" placeholder="whatsapp:+14155238886"></div>
+        <div class="field"><label>Content SID de la plantilla aprobada (opcional en modo prueba)</label><input id="waTemplate" placeholder="HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
+        <button class="btn btn-primary" onclick="guardarWhatsapp()">Guardar configuración</button>
+        <div class="errorMsg" id="waMsg"></div>
+      </div>
+      <div class="sectionCard" style="max-width:520px">
+        <h3>Probar envío</h3>
+        <p class="tag" style="margin-bottom:10px">Guarda la configuración primero. Esto envía un mensaje real de inmediato (no espera los 30 minutos) para confirmar que Twilio esté funcionando.</p>
+        <div class="field"><label>Número de WhatsApp de prueba</label><input id="waTestPhone" placeholder="Ej. 4441234567"></div>
+        <button class="btn btn-outline" onclick="probarWhatsapp()">Enviar mensaje de prueba</button>
+        <div class="errorMsg" id="waTestMsg"></div>
+        <pre id="waTestResult" style="white-space:pre-wrap;font-size:11px;color:var(--muted);margin-top:10px;max-height:200px;overflow:auto"></pre>
+      </div>
+    </div>
+
+    <div class="view" id="view-usuarios">
+      <div class="pageTitle">Usuarios del sistema</div>
+      <div class="pageSub">Administradores, vendedores y choferes</div>
+      <div class="toolbar"><button class="btn btn-primary" onclick="openUserModal()">+ Nuevo usuario</button></div>
+      <div class="sectionCard">
+        <div class="tableWrap"><table id="tblUsuarios"><thead id="tblUsuariosHead"><tr><th>Nombre</th><th>Empresa</th><th>Rol</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-reportes">
+      <div class="pageTitle">Reportes y búsqueda</div>
+      <div class="pageSub">Busca por folio, fecha, ruta o cliente y exporta a CSV</div>
+      <div class="sectionCard">
+        <div class="toolbar">
+          <div class="field"><label>Folio</label><input id="rFolio" placeholder="VIA-260812-0001"></div>
+          <div class="field"><label>Desde</label><input type="date" id="rDesde"></div>
+          <div class="field"><label>Hasta</label><input type="date" id="rHasta"></div>
+          <div class="field"><label>Cliente / teléfono</label><input id="rCliente"></div>
+          <button class="btn btn-outline" onclick="buscarReportes()">Buscar</button>
+          <button class="btn btn-primary" onclick="exportarCSV()">Exportar CSV</button>
+        </div>
+        <div class="tableWrap"><table id="tblReportes"><thead><tr><th>Folio</th><th>Tipo</th><th>Ruta/Destino</th><th>Fecha</th><th>Cliente</th><th>Precio</th><th>Estado</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-venta">
+      <div class="pageTitle">Nueva venta</div>
+      <div class="pageSub">Aparta o vende un lugar en una ruta fija</div>
+      <div class="sectionCard">
+        <div class="formRow">
+          <div class="field"><label>Ruta</label><select id="ventaRuta" onchange="cargarSalidasParaVenta()"></select></div>
+          <div class="field"><label>Fecha</label><input type="date" id="ventaFecha" onchange="cargarSalidasParaVenta()"></div>
+          <div class="field"><label>Salida</label><select id="ventaSalida"></select></div>
+        </div>
+        <div id="ventaSeatInfo" class="tag" style="margin:10px 0"></div>
+        <div id="ventaSeatMapWrap"></div>
+        <hr style="border-color:var(--border);margin:16px 0">
+        <div class="formRow">
+          <div class="field"><label>Nombre del pasajero</label><input id="ventaNombre"></div>
+          <div class="field"><label>Teléfono</label><input id="ventaTelefono"></div>
+        </div>
+        <div class="formRow" style="margin-top:10px">
+          <div class="field"><label>Correo (opcional)</label><input id="ventaCorreo"></div>
+          <div class="field"><label>Lugar de abordaje</label><input id="ventaAbordaje"></div>
+          <div class="field"><label>Precio</label><input type="number" id="ventaPrecio" step="0.01"></div>
+        </div>
+        <div class="formRow" style="margin-top:16px">
+          <button class="btn btn-outline" onclick="crearApartado()">Apartar (pendiente de pago)</button>
+          <button class="btn btn-primary" onclick="crearVentaPagada()">Vender y cobrar</button>
+        </div>
+        <div class="errorMsg" id="ventaMsg"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-especiales">
+      <div class="pageTitle">Viajes especiales</div>
+      <div class="pageSub">Rutas no programadas con precio y horario personalizado</div>
+      <div class="sectionCard">
+        <div class="formRow">
+          <div class="field"><label>Origen</label><input id="espOrigen"></div>
+          <div class="field"><label>Destino</label><input id="espDestino"></div>
+        </div>
+        <div class="formRow" style="margin-top:10px">
+          <div class="field"><label>Fecha</label><input type="date" id="espFecha"></div>
+          <div class="field"><label>Hora</label><input type="time" id="espHora"></div>
+          <div class="field"><label>Precio</label><input type="number" id="espPrecio" step="0.01"></div>
+        </div>
+        <div class="formRow" style="margin-top:10px">
+          <div class="field"><label>Cliente</label><input id="espCliente"></div>
+          <div class="field"><label>Teléfono</label><input id="espTelefono"></div>
+          <div class="field"><label>Correo (opcional)</label><input id="espCorreo"></div>
+        </div>
+        <div class="formRow" style="margin-top:16px">
+          <button class="btn btn-outline" onclick="crearEspecial(false)">Apartar</button>
+          <button class="btn btn-primary" onclick="crearEspecial(true)">Vender y cobrar</button>
+        </div>
+        <div class="errorMsg" id="espMsg"></div>
+      </div>
+      <div class="sectionCard">
+        <h3>Viajes especiales recientes</h3>
+        <div class="tableWrap"><table id="tblEspeciales"><thead><tr><th>Folio</th><th>Ruta</th><th>Fecha</th><th>Cliente</th><th>Estado</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-agenda">
+      <div class="pageTitle">Lugares Agendados</div>
+      <div class="pageSub">Todos los boletos vendidos y apartados, agrupados automáticamente por día, ruta y horario</div>
+      <div class="toolbar">
+        <div class="field"><label>Desde</label><input type="date" id="agendaDesde" onchange="cargarAgenda()"></div>
+        <div class="field"><label>Hasta</label><input type="date" id="agendaHasta" onchange="cargarAgenda()"></div>
+      </div>
+      <div id="agendaContent"></div>
+    </div>
+
+    <div class="view" id="view-buscar">
+      <div class="pageTitle">Cobrar apartados</div>
+      <div class="pageSub">Los apartados pendientes de pago aparecen aquí automáticamente — también puedes buscar por folio, nombre o teléfono</div>
+      <div class="sectionCard">
+        <div class="toolbar">
+          <div class="field"><label>Folio, nombre o teléfono</label><input id="buscarQ" placeholder="Buscar..."></div>
+          <button class="btn btn-primary" onclick="buscarReservas()">Buscar</button>
+        </div>
+        <div class="tableWrap"><table id="tblBuscar"><thead><tr><th>Folio</th><th>Tipo</th><th>Pasajero</th><th>Asiento</th><th>Fecha</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-checkin">
+      <div class="pageTitle">Check-in de ruta</div>
+      <div class="pageSub">Solicita tu salida; un administrador o vendedor debe aprobarla para iniciar el trayecto</div>
+      <div class="sectionCard" id="checkinActiveBox"></div>
+      <div class="sectionCard">
+        <h3>Salidas de hoy</h3>
+        <div class="tableWrap"><table id="tblSalidasChofer"><thead><tr><th>Ruta</th><th>Hora</th><th>Ocupación</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-pasajeros">
+      <div class="pageTitle">Pasajeros de mi ruta</div>
+      <div class="pageSub">Lista de pasajeros con pago confirmado para tu salida activa</div>
+      <div class="sectionCard" id="pasajerosBox"></div>
+    </div>
+
+    <div class="view" id="view-gastos">
+      <div class="pageTitle">Gastos del viaje</div>
+      <div class="pageSub">Registra combustible, casetas y otros gastos de tu salida más reciente</div>
+      <div class="sectionCard" id="gastosContextBox"></div>
+      <div class="sectionCard" id="gastosFormBox"></div>
+      <div class="sectionCard">
+        <h3>Gastos registrados <span class="sub" id="gastosTotal"></span></h3>
+        <div class="tableWrap"><table id="tblGastos"><thead><tr><th>Tipo</th><th>Detalle</th><th>Monto</th><th>Hora</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modalBg" id="userModal">
+  <div class="modalCard">
+    <h3>Nuevo usuario</h3>
+    <div class="field"><label>Nombre completo</label><input id="nuFullname"></div>
+    <div class="field"><label>Correo</label><input id="nuEmail" type="email"></div>
+    <div class="field"><label>Contraseña temporal</label><input id="nuPassword" type="text"></div>
+    <div class="field"><label>Teléfono</label><input id="nuPhone"></div>
+    <div class="field"><label>Rol</label>
+      <select id="nuRole"><option value="vendedor">Vendedor</option><option value="chofer">Chofer</option><option value="admin">Administrador</option></select>
+    </div>
+    <div class="field hidden" id="nuCompanyField"><label>Empresa</label><select id="nuCompany"></select></div>
+    <div class="errorMsg" id="nuMsg"></div>
+    <div class="modalActions">
+      <button class="btn btn-outline" onclick="closeUserModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="crearUsuario()">Crear usuario</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalBg" id="ticketModal">
+  <div class="modalCard">
+    <div id="ticketContent"></div>
+    <div class="modalActions">
+      <button class="btn btn-outline" onclick="closeTicketModal()">Cerrar</button>
+      <button class="btn btn-primary" onclick="window.print()">Imprimir / PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalBg" id="pwdModal">
+  <div class="modalCard">
+    <h3>Restablecer contraseña</h3>
+    <div class="field"><label>Nueva contraseña</label><input id="pwdNew" type="text"></div>
+    <div class="errorMsg" id="pwdMsg"></div>
+    <div class="modalActions">
+      <button class="btn btn-outline" onclick="closePwdModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarResetPwd()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalBg" id="manifestModal">
+  <div class="modalCard" style="max-width:560px">
+    <div id="manifestContent"></div>
+    <div class="modalActions">
+      <button class="btn btn-outline" onclick="closeManifestModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalBg" id="companyModal">
+  <div class="modalCard">
+    <h3>Nueva empresa cliente</h3>
+    <div class="field"><label>Nombre de la empresa / línea de transporte</label><input id="ncNombre" placeholder="Ej. Transportes El Águila"></div>
+    <div class="field"><label>Nombre del negocio en tickets (opcional, igual al de arriba si se deja vacío)</label><input id="ncNombreNegocio"></div>
+    <hr style="border-color:var(--border);margin:16px 0">
+    <p class="tag" style="margin-bottom:10px">Usuario administrador inicial de esta empresa:</p>
+    <div class="field"><label>Nombre completo</label><input id="ncAdminNombre"></div>
+    <div class="field"><label>Correo</label><input id="ncAdminEmail" type="email"></div>
+    <div class="field"><label>Contraseña temporal</label><input id="ncAdminPassword" type="text"></div>
+    <div class="field"><label>Teléfono (opcional)</label><input id="ncAdminPhone"></div>
+    <hr style="border-color:var(--border);margin:16px 0">
+    <div class="field">
+      <label><input type="checkbox" id="ncCloneTemplate" checked style="width:auto;margin-right:6px">Copiar tus rutas y horarios como punto de partida (podrán editarse después)</label>
+    </div>
+    <div class="errorMsg" id="ncMsg"></div>
+    <div class="modalActions">
+      <button class="btn btn-outline" onclick="closeCompanyModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="crearEmpresa()">Crear empresa</button>
+    </div>
+  </div>
+</div>
+<script>
+// ===================== CONFIG =====================
+const SUPABASE_URL = "https://vodbywkwchljubvtraqh.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvZGJ5d2t3Y2hsanVidnRyYXFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NzI0NDMsImV4cCI6MjEwMjE0ODQ0M30.stwdy8NjroeagtJ9wlhVofamSbuv8UzRnIwbaefviTI";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentProfile = null;
+let currentUser = null;
+let businessSettings = null;
+let resetPwdUserId = null;
+
+const NAV = {
+  master: [
+    {id:'empresas', label:'Empresas'},
+    {id:'usuarios', label:'Usuarios'},
+    {id:'soporte', label:'Soporte / Historial'},
+  ],
+  admin: [
+    {id:'dashboard', label:'Panel general'},
+    {id:'monitoreo', label:'Monitoreo en vivo'},
+    {id:'agenda', label:'Lugares Agendados'},
+    {id:'historial', label:'Historial y estadísticas'},
+    {id:'rutas', label:'Rutas y precios'},
+    {id:'negocio', label:'Datos del negocio'},
+    {id:'whatsapp', label:'Recordatorios WhatsApp'},
+    {id:'usuarios', label:'Usuarios'},
+    {id:'reportes', label:'Reportes'},
+    {id:'buscar', label:'Buscar / cobrar'},
+  ],
+  vendedor: [
+    {id:'venta', label:'Nueva venta'},
+    {id:'especiales', label:'Viajes especiales'},
+    {id:'monitoreo', label:'Monitoreo en vivo'},
+    {id:'agenda', label:'Lugares Agendados'},
+    {id:'buscar', label:'Buscar / cobrar'},
+  ],
+  chofer: [
+    {id:'checkin', label:'Check-in / Check-out'},
+    {id:'pasajeros', label:'Mis pasajeros'},
+    {id:'gastos', label:'Gastos del viaje'},
+  ]
+};
+
+// ===================== AUTH =====================
+let loginBrandDebounce = null;
+async function detectarEmpresaLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  if(!email || !email.includes('@')){ setLoginBrand(null); return; }
+  clearTimeout(loginBrandDebounce);
+  loginBrandDebounce = setTimeout(async ()=>{
+    try{
+      const res = await fetch(SUPABASE_URL + '/functions/v1/login-branding', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email })
+      });
+      const json = await res.json();
+      setLoginBrand(json.branding);
+    }catch(e){ setLoginBrand(null); }
+  }, 150);
+}
+function setLoginBrand(settings){
+  const name = settings?.business_name || 'ViajesApp';
+  const brandFont = settings?.theme_brand_font || '';
+  ensureFontLoaded(brandFont);
+  const brandFontCss = fontFamilyValue(brandFont);
+  const html = settings?.logo_url
+    ? `<img class="brandLogo" src="${settings.logo_url}" alt="${name}"><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`
+    : `<span class="logoDot"></span><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`;
+  document.getElementById('loginBrand').innerHTML = html;
+  const root = document.documentElement;
+  root.style.setProperty('--brand', settings?.theme_accent1 || DEFAULT_THEME.accent1);
+  root.style.setProperty('--brand2', settings?.theme_accent2 || DEFAULT_THEME.accent2);
+}
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  if(!email || !password){ errEl.textContent = 'Ingresa correo y contraseña.'; return; }
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'Ingresando...'; btn.disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  btn.textContent = 'Ingresar'; btn.disabled = false;
+  if(error){ errEl.textContent = 'Correo o contraseña incorrectos.'; return; }
+  await afterLogin();
+}
+
+async function afterLogin(){
+  const { data: { user } } = await sb.auth.getUser();
+  currentUser = user;
+  if(!user){ return; }
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+  if(error){
+    console.error('Error leyendo profile:', error);
+    document.getElementById('loginError').textContent = 'Error al leer tu perfil: ' + error.message;
+    await sb.auth.signOut();
+    return;
+  }
+  if(!profile){
+    document.getElementById('loginError').textContent = 'No existe perfil para ' + user.email + '. Pide al administrador que lo cree.';
+    await sb.auth.signOut();
+    return;
+  }
+  if(profile.active === false){
+    document.getElementById('loginError').textContent = 'Tu cuenta está desactivada.';
+    await sb.auth.signOut();
+    return;
+  }
+  if(!profile.company_id && profile.role !== 'master'){
+    document.getElementById('loginError').textContent = 'Tu usuario no tiene empresa asignada. Contacta al administrador.';
+    await sb.auth.signOut();
+    return;
+  }
+  currentProfile = profile;
+  buildNav();
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').classList.add('active');
+  document.getElementById('userName').textContent = profile.full_name || '—';
+  document.getElementById('userEmail').textContent = user.email;
+  const tag = document.getElementById('userRoleTag');
+  tag.textContent = profile.role;
+  tag.className = 'roleTag ' + profile.role;
+  if(profile.role !== 'master'){ await loadBusinessSettings(); applyTheme(businessSettings); updateBrandDisplay(businessSettings); }
+  else { applyTheme(null); updateBrandDisplay(null); }
+  goToView(NAV[profile.role][0].id);
+}
+
+async function doLogout(){
+  stopGpsTracking();
+  if(monitoreoChannel){ sb.removeChannel(monitoreoChannel); monitoreoChannel = null; }
+  await sb.auth.signOut();
+  location.reload();
+}
+
+// ===================== NAV =====================
+const NAV_ICONS = {
+  empresas:'🏢', usuarios:'👤', soporte:'🛟',
+  dashboard:'📊', monitoreo:'📍', agenda:'🎟️', historial:'📈', rutas:'🛣️',
+  negocio:'🏬', whatsapp:'💬', reportes:'📄', buscar:'💳',
+  venta:'🎫', especiales:'⭐',
+  checkin:'✅', pasajeros:'👥', gastos:'⛽',
+};
+function buildNav(){
+  const wrap = document.getElementById('navButtons');
+  wrap.innerHTML = '';
+  NAV[currentProfile.role].forEach(item=>{
+    const b = document.createElement('button');
+    b.className = 'navBtn'; b.id = 'nav-'+item.id;
+    b.innerHTML = `<span class="navIcon">${NAV_ICONS[item.id]||'•'}</span><span>${item.label}</span>`;
+    b.onclick = ()=>goToView(item.id);
+    wrap.appendChild(b);
+  });
+}
+
+async function goToView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.navBtn').forEach(b=>b.classList.remove('active'));
+  const view = document.getElementById('view-'+id);
+  if(view) view.classList.add('active');
+  const btn = document.getElementById('nav-'+id);
+  if(btn) btn.classList.add('active');
+
+  if(id==='empresas') await loadEmpresas();
+  if(id==='soporte') await loadSoporteEmpresas();
+  if(id==='dashboard') await loadDashboard();
+  if(id==='monitoreo') await loadMonitoreo();
+  if(id==='historial') await loadHistorial();
+  if(id==='rutas') await loadRutas();
+  if(id==='negocio') await loadNegocioForm();
+  if(id==='whatsapp') await loadWhatsappForm();
+  if(id==='usuarios') await loadUsuarios();
+  if(id==='venta') await loadVentaForm();
+  if(id==='especiales') await loadEspeciales();
+  if(id==='agenda') await cargarAgenda();
+  if(id==='buscar') await loadPendientesCobro();
+  if(id==='checkin') await loadCheckin();
+  if(id==='pasajeros') await loadPasajeros();
+  if(id==='gastos') await loadGastos();
+}
+
+function money(n){ return '$' + Number(n||0).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtDate(d){ if(!d) return '—'; const [y,m,day]=d.split('-'); return day+'/'+m+'/'+y; }
+function fmtTime(t){ if(!t) return '—'; return t.slice(0,5); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+// ===================== BUSINESS SETTINGS =====================
+async function loadBusinessSettings(){
+  if(!currentProfile?.company_id){ businessSettings = null; return; }
+  const { data } = await sb.from('business_settings').select('*').eq('company_id', currentProfile.company_id).maybeSingle();
+  businessSettings = data;
+}
+const DEFAULT_THEME = { bg:'#0b1220', accent1:'#2f8fff', accent2:'#22d3c5', font:'', brandFont:'' };
+const DEFAULT_FONT_STACK = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+const NATIVE_FONTS = ["Georgia, serif", "'Courier New', monospace"];
+let loadedGoogleFonts = new Set();
+
+function ensureFontLoaded(font){
+  if(!font || NATIVE_FONTS.includes(font) || loadedGoogleFonts.has(font)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${font.replace(/ /g,'+')}:wght@400;500;600;700&display=swap`;
+  document.head.appendChild(link);
+  loadedGoogleFonts.add(font);
+}
+function fontFamilyValue(font){
+  if(!font) return DEFAULT_FONT_STACK;
+  if(font.includes(',')) return font;
+  return `'${font}', ${DEFAULT_FONT_STACK}`;
+}
+function applyTheme(settings){
+  const bg = settings?.theme_bg_color || DEFAULT_THEME.bg;
+  const accent1 = settings?.theme_accent1 || DEFAULT_THEME.accent1;
+  const accent2 = settings?.theme_accent2 || DEFAULT_THEME.accent2;
+  const font = settings?.theme_font || '';
+  const root = document.documentElement;
+  root.style.setProperty('--bg', bg);
+  root.style.setProperty('--brand', accent1);
+  root.style.setProperty('--brand2', accent2);
+  document.body.style.background = `linear-gradient(180deg, ${bg}, ${bg})`;
+  ensureFontLoaded(font);
+  document.body.style.fontFamily = fontFamilyValue(font);
+}
+function updateBrandDisplay(settings){
+  const name = settings?.business_name || 'ViajesApp';
+  const brandFont = settings?.theme_brand_font || '';
+  ensureFontLoaded(brandFont);
+  const brandFontCss = fontFamilyValue(brandFont);
+  const html = settings?.logo_url
+    ? `<img class="brandLogo" src="${settings.logo_url}" alt="${name}"><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`
+    : `<span class="logoDot"></span><span class="brandName" style="font-family:${brandFontCss}">${name}</span>`;
+  ['brandBox','brandBoxMobile'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = html;
+  });
+  const themeColorMeta = document.getElementById('themeColorMeta');
+  if(themeColorMeta) themeColorMeta.setAttribute('content', settings?.theme_bg_color || DEFAULT_THEME.bg);
+}
+
+async function loadNegocioForm(){
+  await loadBusinessSettings();
+  if(businessSettings){
+    document.getElementById('bizName').value = businessSettings.business_name || '';
+    document.getElementById('bizPhone').value = businessSettings.phone || '';
+    document.getElementById('bizAddress').value = businessSettings.address || '';
+    document.getElementById('bizEmail').value = businessSettings.email || '';
+    document.getElementById('bizLogo').value = businessSettings.logo_url || '';
+    const preview = document.getElementById('bizLogoPreview');
+    if(businessSettings.logo_url){ preview.src = businessSettings.logo_url; preview.classList.remove('hidden'); }
+    else { preview.classList.add('hidden'); }
+    document.getElementById('themeBg').value = businessSettings.theme_bg_color || DEFAULT_THEME.bg;
+    document.getElementById('themeAccent1').value = businessSettings.theme_accent1 || DEFAULT_THEME.accent1;
+    document.getElementById('themeAccent2').value = businessSettings.theme_accent2 || DEFAULT_THEME.accent2;
+    document.getElementById('themeFont').value = businessSettings.theme_font || '';
+    document.getElementById('themeBrandFont').value = businessSettings.theme_brand_font || '';
+  }
+}
+async function subirLogo(){
+  const fileInput = document.getElementById('bizLogoFile');
+  const file = fileInput.files[0];
+  const msg = document.getElementById('bizLogoMsg'); msg.textContent = '';
+  if(!file) return;
+  if(file.size > 2 * 1024 * 1024){ msg.textContent = 'La imagen no debe superar 2 MB.'; return; }
+  msg.style.color = 'var(--muted)';
+  msg.textContent = 'Subiendo...';
+  const ext = file.name.split('.').pop();
+  const path = `${currentProfile.company_id}/logo-${Date.now()}.${ext}`;
+  const { error: uploadError } = await sb.storage.from('logos').upload(path, file, { upsert: true });
+  if(uploadError){ msg.textContent = uploadError.message; return; }
+  const { data: pub } = sb.storage.from('logos').getPublicUrl(path);
+  document.getElementById('bizLogo').value = pub.publicUrl;
+  const preview = document.getElementById('bizLogoPreview');
+  preview.src = pub.publicUrl;
+  preview.classList.remove('hidden');
+  msg.style.color = '#86efac';
+  msg.textContent = 'Imagen cargada. No olvides "Guardar cambios" para confirmarla.';
+}
+async function guardarNegocio(){
+  const payload = {
+    business_name: document.getElementById('bizName').value.trim(),
+    phone: document.getElementById('bizPhone').value.trim(),
+    address: document.getElementById('bizAddress').value.trim(),
+    email: document.getElementById('bizEmail').value.trim(),
+    logo_url: document.getElementById('bizLogo').value.trim(),
+  };
+  const { error } = await sb.from('business_settings').update(payload).eq('company_id', currentProfile.company_id);
+  const msg = document.getElementById('bizMsg');
+  msg.style.color = error ? '#fca5a5' : '#86efac';
+  msg.textContent = error ? error.message : 'Guardado correctamente.';
+  await loadBusinessSettings();
+  updateBrandDisplay(businessSettings);
+}
+async function guardarTema(){
+  const payload = {
+    theme_bg_color: document.getElementById('themeBg').value,
+    theme_accent1: document.getElementById('themeAccent1').value,
+    theme_accent2: document.getElementById('themeAccent2').value,
+    theme_font: document.getElementById('themeFont').value || null,
+    theme_brand_font: document.getElementById('themeBrandFont').value || null,
+  };
+  const { error } = await sb.from('business_settings').update(payload).eq('company_id', currentProfile.company_id);
+  const msg = document.getElementById('themeMsg');
+  msg.style.color = error ? '#fca5a5' : '#86efac';
+  msg.textContent = error ? error.message : 'Personalización guardada.';
+  await loadBusinessSettings();
+  applyTheme(businessSettings);
+  updateBrandDisplay(businessSettings);
+}
+async function restablecerTema(){
+  document.getElementById('themeBg').value = DEFAULT_THEME.bg;
+  document.getElementById('themeAccent1').value = DEFAULT_THEME.accent1;
+  document.getElementById('themeAccent2').value = DEFAULT_THEME.accent2;
+  document.getElementById('themeFont').value = '';
+  document.getElementById('themeBrandFont').value = '';
+  await guardarTema();
+}
+
+// ===================== WHATSAPP =====================
+async function loadWhatsappForm(){
+  const { data } = await sb.from('whatsapp_settings').select('*').eq('company_id', currentProfile.company_id).maybeSingle();
+  document.getElementById('waEnabled').checked = data?.enabled || false;
+  document.getElementById('waMinutes').value = data?.reminder_minutes_before || 30;
+  document.getElementById('waSid').value = data?.twilio_account_sid || '';
+  document.getElementById('waToken').value = data?.twilio_auth_token || '';
+  document.getElementById('waFrom').value = data?.twilio_whatsapp_from || '';
+  document.getElementById('waTemplate').value = data?.twilio_template_sid || '';
+  const statusBox = document.getElementById('waStatusBox');
+  const configured = !!(data?.twilio_account_sid && data?.twilio_auth_token && data?.twilio_whatsapp_from);
+  if(data?.enabled && configured){
+    statusBox.innerHTML = '<span class="badge paid">Activado</span> Los recordatorios se están enviando automáticamente.';
+  } else if(configured){
+    statusBox.innerHTML = '<span class="badge cancelled">Desactivado</span> Tienes credenciales guardadas pero el interruptor está apagado.';
+  } else {
+    statusBox.innerHTML = '<span class="badge pending">Sin configurar</span> Aún no has guardado tus credenciales de Twilio.';
+  }
+}
+async function guardarWhatsapp(){
+  const msg = document.getElementById('waMsg'); msg.textContent = '';
+  const payload = {
+    company_id: currentProfile.company_id,
+    enabled: document.getElementById('waEnabled').checked,
+    reminder_minutes_before: parseInt(document.getElementById('waMinutes').value) || 30,
+    twilio_account_sid: document.getElementById('waSid').value.trim() || null,
+    twilio_auth_token: document.getElementById('waToken').value.trim() || null,
+    twilio_whatsapp_from: document.getElementById('waFrom').value.trim() || null,
+    twilio_template_sid: document.getElementById('waTemplate').value.trim() || null,
+  };
+  if(payload.enabled && (!payload.twilio_account_sid || !payload.twilio_auth_token || !payload.twilio_whatsapp_from)){
+    msg.textContent = 'Para activar, completa Account SID, Auth Token y número remitente.';
+    return;
+  }
+  const { error } = await sb.from('whatsapp_settings').upsert(payload, { onConflict:'company_id' });
+  msg.style.color = error ? '#fca5a5' : '#86efac';
+  msg.textContent = error ? error.message : 'Configuración guardada correctamente.';
+  await loadWhatsappForm();
+}
+async function probarWhatsapp(){
+  const msg = document.getElementById('waTestMsg'); msg.textContent = '';
+  const resultBox = document.getElementById('waTestResult'); resultBox.textContent = '';
+  const phone = document.getElementById('waTestPhone').value.trim();
+  if(!phone){ msg.textContent = 'Indica un número de WhatsApp de prueba.'; return; }
+  const { data: { session } } = await sb.auth.getSession();
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/whatsapp-test-send', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify({ phone })
+    });
+    const json = await res.json();
+    if(!res.ok || json.error){ msg.textContent = json.error || 'No se pudo enviar.'; return; }
+    msg.style.color = json.success ? '#86efac' : '#fca5a5';
+    msg.textContent = json.success ? 'Mensaje enviado. Revisa el WhatsApp de prueba.' : 'Twilio respondió con error.';
+    resultBox.textContent = JSON.stringify(json.twilio_response, null, 2);
+  }catch(e){ msg.textContent = 'Error de conexión: ' + e.message; }
+}
+
+// ===================== DASHBOARD =====================
+async function loadDashboard(){
+  const today = todayStr();
+  const cid = currentProfile.company_id;
+  const [{ data: bookingsToday }, { data: specialToday }, { data: trips }] = await Promise.all([
+    sb.from('bookings').select('price,payment_status,created_at').eq('company_id', cid).gte('created_at', today+'T00:00:00').lte('created_at', today+'T23:59:59'),
+    sb.from('special_trips').select('price,payment_status,created_at').eq('company_id', cid).gte('created_at', today+'T00:00:00').lte('created_at', today+'T23:59:59'),
+    sb.from('trip_instances').select('*, routes(origin,destination,code)').eq('company_id', cid).eq('trip_date', today).order('departure_time')
+  ]);
+  const all = [...(bookingsToday||[]), ...(specialToday||[])];
+  const ingresos = all.filter(x=>x.payment_status==='paid').reduce((a,b)=>a+Number(b.price||0),0);
+  const asientos = (trips||[]).reduce((a,t)=>a+t.seats_booked,0);
+  document.getElementById('stat-ventasHoy').textContent = all.length;
+  document.getElementById('stat-ingresosHoy').textContent = money(ingresos);
+  document.getElementById('stat-asientosHoy').textContent = asientos;
+  document.getElementById('stat-salidasHoy').textContent = (trips||[]).length;
+  const tbody = document.querySelector('#tblSalidasHoy tbody');
+  tbody.innerHTML = '';
+  (trips||[]).forEach(t=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.routes.origin} → ${t.routes.destination}</td><td>${fmtTime(t.departure_time)}</td><td>${t.seats_booked}/${t.total_seats}</td><td>${money(t.price)}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('dashRefresh').textContent = 'actualizado ' + new Date().toLocaleTimeString('es-MX');
+}
+
+// ===================== RUTAS =====================
+async function crearRuta(){
+  const msg = document.getElementById('newRouteMsg'); msg.textContent = '';
+  const origen = document.getElementById('newRouteOrigen').value.trim();
+  const destino = document.getElementById('newRouteDestino').value.trim();
+  let code = document.getElementById('newRouteCode').value.trim();
+  if(!origen || !destino){ msg.textContent = 'Indica origen y destino.'; return; }
+  if(!code){ code = (origen.slice(0,3) + '-' + destino.slice(0,3)).toUpperCase().replace(/[^A-Z0-9-]/g,''); }
+  const { error } = await sb.from('routes').insert({ origin: origen, destination: destino, code, company_id: currentProfile.company_id });
+  if(error){
+    msg.textContent = error.code === '23505' ? 'Ya existe una ruta con ese código, prueba con otro.' : error.message;
+    return;
+  }
+  document.getElementById('newRouteOrigen').value = '';
+  document.getElementById('newRouteDestino').value = '';
+  document.getElementById('newRouteCode').value = '';
+  msg.style.color = '#86efac';
+  msg.textContent = 'Ruta agregada correctamente.';
+  await loadRutas();
+}
+async function toggleRutaActiva(id, active){
+  await sb.from('routes').update({ active }).eq('id', id);
+  await loadRutas();
+}
+async function loadRutas(){
+  const { data: routes } = await sb.from('routes').select('*').eq('company_id', currentProfile.company_id).order('code');
+  const { data: schedules } = await sb.from('route_schedules').select('*').order('departure_time');
+  const container = document.getElementById('rutasContainer');
+  container.innerHTML = '';
+  const dayNames = ['D','L','M','M','J','V','S'];
+  (routes||[]).forEach(route=>{
+    const relSchedules = (schedules||[]).filter(s=>s.route_id===route.id);
+    const card = document.createElement('div');
+    card.className = 'sectionCard';
+    let rows = relSchedules.map(s=>`
+      <tr>
+        <td>${fmtTime(s.departure_time)}</td>
+        <td><input type="number" value="${s.default_price}" step="0.01" style="width:90px;padding:6px;background:var(--panel2);border:1px solid var(--border);border-radius:6px;color:var(--text)" onchange="updateSchedule('${s.id}','default_price',this.value)"></td>
+        <td><input type="number" value="${s.default_seats}" style="width:70px;padding:6px;background:var(--panel2);border:1px solid var(--border);border-radius:6px;color:var(--text)" onchange="updateSchedule('${s.id}','default_seats',this.value)"></td>
+        <td>${dayNames.map((d,i)=>`<label style="margin-right:4px;font-size:11px"><input type="checkbox" ${s.days_of_week.includes(i)?'checked':''} onchange="toggleDay('${s.id}',${i},this.checked, ${JSON.stringify(s.days_of_week)})"> ${d}</label>`).join('')}</td>
+        <td><input type="checkbox" ${s.active?'checked':''} onchange="updateSchedule('${s.id}','active',this.checked)"></td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteSchedule('${s.id}')">Eliminar</button></td>
+      </tr>`).join('');
+    card.innerHTML = `
+      <h3>${route.origin} → ${route.destination} <span class="sub">${route.code}</span>
+        <button class="btn ${route.active?'btn-danger':'btn-ok'} btn-sm" onclick="toggleRutaActiva('${route.id}', ${!route.active})">${route.active?'Desactivar ruta':'Activar ruta'}</button>
+      </h3>
+      <div class="tableWrap"><table>
+        <thead><tr><th>Hora</th><th>Precio</th><th>Asientos</th><th>Días</th><th>Activo</th><th></th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="6" class="tag">Sin horarios configurados</td></tr>'}</tbody>
+      </table></div>
+      <div class="formRow" style="margin-top:14px">
+        <div class="field" style="max-width:120px"><label>Hora</label><input type="time" id="newTime-${route.id}"></div>
+        <div class="field" style="max-width:110px"><label>Precio</label><input type="number" id="newPrice-${route.id}" step="0.01"></div>
+        <div class="field" style="max-width:110px">
+          <label>Asientos (unidad)</label>
+          <input type="number" id="newSeats-${route.id}" value="13">
+          <div class="capacityBtns" style="margin-top:6px">
+            <button type="button" class="capBtn" onclick="document.getElementById('newSeats-${route.id}').value=7">7 pax</button>
+            <button type="button" class="capBtn" onclick="document.getElementById('newSeats-${route.id}').value=13">13 pax</button>
+          </div>
+        </div>
+        <button class="btn btn-outline" onclick="addSchedule('${route.id}')">+ Agregar horario</button>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+async function addSchedule(routeId){
+  const time = document.getElementById('newTime-'+routeId).value;
+  const price = document.getElementById('newPrice-'+routeId).value || 0;
+  const seats = document.getElementById('newSeats-'+routeId).value || 13;
+  if(!time){ alert('Indica una hora de salida.'); return; }
+  const { error } = await sb.from('route_schedules').insert({ route_id: routeId, departure_time: time, default_price: price, default_seats: seats });
+  if(error){ alert(error.message); return; }
+  await loadRutas();
+}
+async function updateSchedule(id, field, value){
+  const payload = {}; payload[field] = value;
+  await sb.from('route_schedules').update(payload).eq('id', id);
+}
+async function toggleDay(id, dayIdx, checked, currentDays){
+  let days = [...currentDays];
+  if(checked && !days.includes(dayIdx)) days.push(dayIdx);
+  if(!checked) days = days.filter(d=>d!==dayIdx);
+  await sb.from('route_schedules').update({ days_of_week: days }).eq('id', id);
+}
+async function deleteSchedule(id){
+  if(!confirm('¿Eliminar este horario?')) return;
+  await sb.from('route_schedules').delete().eq('id', id);
+  await loadRutas();
+}
+async function generarSalidas(){
+  const days = parseInt(document.getElementById('genDays').value || '21');
+  const { data, error } = await sb.rpc('generate_trip_instances', { p_days_ahead: days });
+  if(error){ alert('Error generando salidas:\n' + error.message); return; }
+  alert('Se generaron ' + data + ' nuevas salidas.');
+}
+
+// ===================== USUARIOS =====================
+async function loadUsuarios(){
+  const isMaster = currentProfile.role === 'master';
+  const head = document.getElementById('tblUsuariosHead');
+  head.innerHTML = isMaster
+    ? '<tr><th>Nombre</th><th>Empresa</th><th>Rol</th><th>Correo</th><th>Contraseña</th><th>Estado</th><th>Acciones</th></tr>'
+    : '<tr><th>Nombre</th><th>Empresa</th><th>Rol</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr>';
+
+  let query = sb.from('profiles').select('*, companies(name)').order('role');
+  if(!isMaster) query = query.eq('company_id', currentProfile.company_id);
+  const { data } = await query;
+
+  let vaultByUser = {};
+  if(isMaster){
+    const { data: vault } = await sb.from('credentials_vault').select('*');
+    (vault||[]).forEach(v=>{ vaultByUser[v.user_id] = v; });
+  }
+
+  const tbody = document.querySelector('#tblUsuarios tbody');
+  tbody.innerHTML = '';
+  (data||[]).forEach(u=>{
+    const tr = document.createElement('tr');
+    if(isMaster){
+      const v = vaultByUser[u.id];
+      const correo = v?.email || '—';
+      const pwCell = v?.plaintext_password
+        ? `<span class="pwCell"><span class="pwText" data-real="${v.plaintext_password.replace(/"/g,'&quot;')}" data-hidden="true">••••••••</span><button type="button" class="pwEye" onclick="togglePwVisible(this)">👁</button></span>`
+        : `<span class="pwSaveInline"><input type="text" id="pwManual-${u.id}" placeholder="Escribir..."><button class="btn btn-outline btn-sm" onclick="guardarPwManual('${u.id}','${(v?.email||'').replace(/'/g,"\\'")}')">Guardar</button></span>`;
+      tr.innerHTML = `
+        <td>${u.full_name}</td>
+        <td>${u.companies?.name || '—'}</td>
+        <td><span class="roleTag ${u.role}">${u.role}</span></td>
+        <td>${correo}</td>
+        <td>${pwCell}</td>
+        <td>${u.active? '<span class="badge paid">Activo</span>' : '<span class="badge cancelled">Inactivo</span>'}</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="openPwdModal('${u.id}')">Resetear</button>
+          <button class="btn ${u.active?'btn-danger':'btn-ok'} btn-sm" onclick="toggleUserActive('${u.id}', ${!u.active})">${u.active?'Desactivar':'Activar'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUsuario('${u.id}')">Eliminar</button>
+        </td>`;
+    } else {
+      tr.innerHTML = `
+        <td>${u.full_name}</td>
+        <td>${u.companies?.name || '—'}</td>
+        <td><span class="roleTag ${u.role}">${u.role}</span></td>
+        <td>${u.phone||'—'}</td>
+        <td>${u.active? '<span class="badge paid">Activo</span>' : '<span class="badge cancelled">Inactivo</span>'}</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="openPwdModal('${u.id}')">Contraseña</button>
+          <button class="btn ${u.active?'btn-danger':'btn-ok'} btn-sm" onclick="toggleUserActive('${u.id}', ${!u.active})">${u.active?'Desactivar':'Activar'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUsuario('${u.id}')">Eliminar</button>
+        </td>`;
+    }
+    tbody.appendChild(tr);
+  });
+}
+function togglePwVisible(btn){
+  const span = btn.previousElementSibling;
+  const isHidden = span.getAttribute('data-hidden') === 'true';
+  span.textContent = isHidden ? span.getAttribute('data-real') : '••••••••';
+  span.setAttribute('data-hidden', isHidden ? 'false' : 'true');
+  btn.textContent = isHidden ? '🙈' : '👁';
+}
+async function guardarPwManual(userId, existingEmail){
+  const input = document.getElementById('pwManual-'+userId);
+  const pwd = input.value.trim();
+  if(!pwd){ return; }
+  const { error } = await sb.from('credentials_vault').upsert({
+    user_id: userId, email: existingEmail || null, plaintext_password: pwd, updated_at: new Date().toISOString()
+  });
+  if(error){ alert(error.message); return; }
+  await loadUsuarios();
+}
+async function openUserModal(preselectCompanyId){
+  document.getElementById('userModal').classList.add('active');
+  document.getElementById('nuMsg').textContent='';
+  const companyField = document.getElementById('nuCompanyField');
+  if(currentProfile.role === 'master'){
+    companyField.classList.remove('hidden');
+    const { data: companies } = await sb.from('companies').select('*').eq('active', true).order('name');
+    document.getElementById('nuCompany').innerHTML = (companies||[]).map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    if(preselectCompanyId) document.getElementById('nuCompany').value = preselectCompanyId;
+  } else {
+    companyField.classList.add('hidden');
+  }
+}
+function closeUserModal(){ document.getElementById('userModal').classList.remove('active'); }
+async function crearUsuario(){
+  const isMaster = currentProfile.role === 'master';
+  const payload = {
+    full_name: document.getElementById('nuFullname').value.trim(),
+    email: document.getElementById('nuEmail').value.trim(),
+    password: document.getElementById('nuPassword').value,
+    phone: document.getElementById('nuPhone').value.trim(),
+    role: document.getElementById('nuRole').value,
+  };
+  if(isMaster) payload.company_id = document.getElementById('nuCompany').value;
+  const msg = document.getElementById('nuMsg');
+  if(!payload.full_name || !payload.email || !payload.password){ msg.textContent = 'Completa todos los campos obligatorios.'; return; }
+  if(isMaster && !payload.company_id){ msg.textContent = 'Selecciona una empresa.'; return; }
+  const { data: { session } } = await sb.auth.getSession();
+  const endpoint = isMaster ? 'master-create-user' : 'admin-create-user';
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/' + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+session.access_token },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if(!res.ok){ msg.textContent = json.error || 'Error al crear usuario.'; return; }
+    closeUserModal();
+    if(document.getElementById('view-soporte').classList.contains('active')) await loadSoporte();
+    else await loadUsuarios();
+  }catch(e){ msg.textContent = 'Error de conexión: ' + e.message; }
+}
+async function toggleUserActive(id, active){
+  const { data: { session } } = await sb.auth.getSession();
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify({ action:'set_active', user_id:id, active })
+    });
+    if(!res.ok){ const j = await res.json(); alert(j.error); return; }
+    await loadUsuarios();
+  }catch(e){ alert('Error de conexión: ' + e.message); }
+}
+async function deleteUsuario(id){
+  if(!confirm('¿Eliminar este usuario permanentemente?')) return;
+  const { data: { session } } = await sb.auth.getSession();
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify({ action:'delete', user_id:id })
+    });
+    if(!res.ok){ const j = await res.json(); alert(j.error); return; }
+    await loadUsuarios();
+  }catch(e){ alert('Error de conexión: ' + e.message); }
+}
+function openPwdModal(id){ resetPwdUserId = id; document.getElementById('pwdModal').classList.add('active'); document.getElementById('pwdMsg').textContent=''; document.getElementById('pwdNew').value=''; }
+function closePwdModal(){ document.getElementById('pwdModal').classList.remove('active'); }
+async function confirmarResetPwd(){
+  const pwd = document.getElementById('pwdNew').value;
+  const msg = document.getElementById('pwdMsg');
+  const { data: { session } } = await sb.auth.getSession();
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/admin-manage-user', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify({ action:'reset_password', user_id:resetPwdUserId, new_password: pwd })
+    });
+    const json = await res.json();
+    if(!res.ok){ msg.textContent = json.error; return; }
+    closePwdModal();
+    await loadUsuarios();
+  }catch(e){ msg.textContent = 'Error de conexión: ' + e.message; }
+}
+
+// ===================== REPORTES =====================
+async function buscarReportes(){
+  const folio = document.getElementById('rFolio').value.trim();
+  const desde = document.getElementById('rDesde').value;
+  const hasta = document.getElementById('rHasta').value;
+  const cliente = document.getElementById('rCliente').value.trim();
+  let bq = sb.from('bookings').select('folio,price,payment_status,passenger_name,passenger_phone,created_at, trip_instances(trip_date, routes(origin,destination))').eq('company_id', currentProfile.company_id);
+  let eq = sb.from('special_trips').select('folio,price,payment_status,client_name,client_phone,trip_date,origin,destination,created_at').eq('company_id', currentProfile.company_id);
+  if(folio){ bq = bq.ilike('folio','%'+folio+'%'); eq = eq.ilike('folio','%'+folio+'%'); }
+  if(cliente){ bq = bq.or(`passenger_name.ilike.%${cliente}%,passenger_phone.ilike.%${cliente}%`); eq = eq.or(`client_name.ilike.%${cliente}%,client_phone.ilike.%${cliente}%`); }
+  const [{data:bookings}, {data:specials}] = await Promise.all([bq, eq]);
+  let rows = [];
+  (bookings||[]).forEach(b=>{
+    const d = b.trip_instances?.trip_date;
+    if(desde && d < desde) return; if(hasta && d > hasta) return;
+    rows.push({folio:b.folio, tipo:'Ruta fija', ruta: b.trip_instances ? (b.trip_instances.routes.origin+' → '+b.trip_instances.routes.destination) : '—', fecha:d, cliente:b.passenger_name, precio:b.price, estado:b.payment_status});
+  });
+  (specials||[]).forEach(s=>{
+    if(desde && s.trip_date < desde) return; if(hasta && s.trip_date > hasta) return;
+    rows.push({folio:s.folio, tipo:'Especial', ruta: s.origin+' → '+s.destination, fecha:s.trip_date, cliente:s.client_name, precio:s.price, estado:s.payment_status});
+  });
+  rows.sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||''));
+  window._lastReportRows = rows;
+  const tbody = document.querySelector('#tblReportes tbody');
+  tbody.innerHTML = '';
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.folio}</td><td>${r.tipo}</td><td>${r.ruta}</td><td>${fmtDate(r.fecha)}</td><td>${r.cliente}</td><td>${money(r.precio)}</td><td><span class="badge ${r.estado}">${r.estado}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function exportarCSV(){
+  const rows = window._lastReportRows || [];
+  if(!rows.length){ alert('Primero realiza una búsqueda.'); return; }
+  let csv = 'Folio,Tipo,Ruta,Fecha,Cliente,Precio,Estado\n';
+  rows.forEach(r=>{ csv += `"${r.folio}","${r.tipo}","${r.ruta}","${r.fecha||''}","${r.cliente}","${r.precio}","${r.estado}"\n`; });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'reporte_viajesapp_'+todayStr()+'.csv'; a.click();
+}
+
+// ===================== VENTA =====================
+let ventaSelectedSeat = null;
+let ventaTakenSeats = [];
+let ventaTotalSeats = 0;
+
+async function loadVentaForm(){
+  const { data: routes } = await sb.from('routes').select('*').eq('active',true).eq('company_id', currentProfile.company_id).order('code');
+  const sel = document.getElementById('ventaRuta');
+  sel.innerHTML = (routes||[]).map(r=>`<option value="${r.id}">${r.origin} → ${r.destination}</option>`).join('');
+  document.getElementById('ventaFecha').value = todayStr();
+  await cargarSalidasParaVenta();
+}
+async function cargarSalidasParaVenta(){
+  const routeId = document.getElementById('ventaRuta').value;
+  const fecha = document.getElementById('ventaFecha').value;
+  if(!routeId || !fecha) return;
+  const { data: trips } = await sb.from('trip_instances').select('*').eq('route_id', routeId).eq('company_id', currentProfile.company_id).eq('trip_date', fecha).order('departure_time');
+  const sel = document.getElementById('ventaSalida');
+  sel.innerHTML = (trips||[]).map(t=>`<option value="${t.id}" data-price="${t.price}" data-total="${t.total_seats}">${fmtTime(t.departure_time)} — ${t.total_seats-t.seats_booked}/${t.total_seats} disponibles</option>`).join('');
+  sel.onchange = updateVentaSeatInfo;
+  await updateVentaSeatInfo();
+}
+async function updateVentaSeatInfo(){
+  const sel = document.getElementById('ventaSalida');
+  const opt = sel.options[sel.selectedIndex];
+  const info = document.getElementById('ventaSeatInfo');
+  const mapWrap = document.getElementById('ventaSeatMapWrap');
+  ventaSelectedSeat = null;
+  if(!opt){
+    info.textContent = 'No hay salidas para esta fecha. Ve a Rutas y precios para generarlas.';
+    mapWrap.innerHTML = '';
+    return;
+  }
+  const tripId = opt.value;
+  const price = opt.getAttribute('data-price');
+  ventaTotalSeats = parseInt(opt.getAttribute('data-total'));
+  document.getElementById('ventaPrecio').value = price;
+  const { data: taken } = await sb.from('bookings').select('seat_number').eq('trip_instance_id', tripId).neq('payment_status','cancelled').not('seat_number','is',null);
+  ventaTakenSeats = (taken||[]).map(b=>b.seat_number);
+  info.textContent = (ventaTotalSeats - ventaTakenSeats.length) + ' asientos disponibles de ' + ventaTotalSeats + ' · precio sugerido ' + money(price);
+  renderVentaSeatMap();
+}
+function renderVentaSeatMap(){
+  document.getElementById('ventaSeatMapWrap').innerHTML = `
+    <div class="seatMapWrap">
+      ${seatMapHtml(ventaTotalSeats, ventaTakenSeats, ventaSelectedSeat, 'selectVentaSeat')}
+      <div class="seatLegend">
+        <div class="item"><span class="legendDot free"></span> Disponible</div>
+        <div class="item"><span class="legendDot taken"></span> Ocupado</div>
+        <div class="item"><span class="legendDot selected"></span> Tu selección</div>
+        <div class="tag" style="margin-top:6px">Unidad de ${ventaTotalSeats} pasajeros</div>
+      </div>
+    </div>`;
+}
+function selectVentaSeat(n){
+  if(ventaTakenSeats.includes(n)) return;
+  ventaSelectedSeat = (ventaSelectedSeat === n) ? null : n;
+  renderVentaSeatMap();
+}
+function seatMapHtml(total, taken, selected, onclickFn){
+  if(!total) return '<p class="tag">Selecciona una salida para ver los asientos.</p>';
+  let rows = []; let n = 1;
+  while(n <= total){
+    const left = []; for(let k=0;k<2 && n<=total;k++){ left.push(n); n++; }
+    const right = []; if(n<=total){ right.push(n); n++; }
+    rows.push({left, right});
+  }
+  let html = '<div class="seatMap"><div class="driverRow">🚐 Conductor</div>';
+  rows.forEach(row=>{
+    html += '<div class="seatRow">';
+    row.left.forEach(s=> html += seatBtnHtml(s, taken, selected, onclickFn));
+    html += '<div class="aisle"></div>';
+    row.right.forEach(s=> html += seatBtnHtml(s, taken, selected, onclickFn));
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+function seatBtnHtml(s, taken, selected, onclickFn){
+  const isTaken = taken.includes(s);
+  const isSelected = s === selected;
+  const cls = isTaken ? 'seatBtn taken' : (isSelected ? 'seatBtn selected' : 'seatBtn');
+  return `<button type="button" class="${cls}" ${isTaken?'disabled':''} onclick="${onclickFn}(${s})">${s}</button>`;
+}
+async function crearApartado(){ await guardarVenta(false); }
+async function crearVentaPagada(){ await guardarVenta(true); }
+async function guardarVenta(pagado){
+  const msg = document.getElementById('ventaMsg'); msg.textContent='';
+  const tripId = document.getElementById('ventaSalida').value;
+  const nombre = document.getElementById('ventaNombre').value.trim();
+  const telefono = document.getElementById('ventaTelefono').value.trim();
+  const correo = document.getElementById('ventaCorreo').value.trim();
+  const abordaje = document.getElementById('ventaAbordaje').value.trim();
+  const precio = document.getElementById('ventaPrecio').value;
+  if(!tripId || !nombre || !telefono){ msg.textContent = 'Completa ruta, salida, nombre y teléfono.'; return; }
+  if(!ventaSelectedSeat){ msg.textContent = 'Selecciona un asiento en el mapa.'; return; }
+  const payload = {
+    trip_instance_id: tripId,
+    company_id: currentProfile.company_id,
+    passenger_name: nombre, passenger_phone: telefono,
+    passenger_email: correo||null, boarding_point: abordaje||null, price: precio||0,
+    seat_number: ventaSelectedSeat,
+    payment_status: pagado ? 'paid' : 'pending', sold_by: currentUser.id,
+    paid_at: pagado ? new Date().toISOString() : null,
+  };
+  const { data, error } = await sb.from('bookings').insert(payload).select().single();
+  if(error){
+    msg.textContent = error.code === '23505' ? 'Ese asiento ya fue tomado, elige otro.' : error.message;
+    await updateVentaSeatInfo();
+    return;
+  }
+  ['ventaNombre','ventaTelefono','ventaCorreo','ventaAbordaje'].forEach(id=>document.getElementById(id).value='');
+  await cargarSalidasParaVenta();
+  if(pagado){ await showTicketForBooking(data.id); }
+  else { msg.style.color = '#86efac'; msg.textContent = 'Apartado creado: ' + data.folio + ' · asiento ' + payload.seat_number; }
+}
+
+// ===================== ESPECIALES =====================
+async function loadEspeciales(){
+  document.getElementById('espFecha').value = todayStr();
+  const { data } = await sb.from('special_trips').select('*').eq('company_id', currentProfile.company_id).order('created_at',{ascending:false}).limit(20);
+  const tbody = document.querySelector('#tblEspeciales tbody');
+  tbody.innerHTML = '';
+  (data||[]).forEach(s=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.folio}</td><td>${s.origin} → ${s.destination}</td><td>${fmtDate(s.trip_date)} ${fmtTime(s.trip_time)}</td><td>${s.client_name}</td><td><span class="badge ${s.payment_status}">${s.payment_status}</span></td>
+      <td>${s.payment_status!=='paid'?`<button class="btn btn-ok btn-sm" onclick="marcarPagadoEspecial('${s.id}')">Cobrar</button>`:`<button class="btn btn-outline btn-sm" onclick="showTicketForSpecial('${s.id}')">Ticket</button>`}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+async function crearEspecial(pagado){
+  const msg = document.getElementById('espMsg'); msg.textContent='';
+  const payload = {
+    company_id: currentProfile.company_id,
+    origin: document.getElementById('espOrigen').value.trim(),
+    destination: document.getElementById('espDestino').value.trim(),
+    trip_date: document.getElementById('espFecha').value,
+    trip_time: document.getElementById('espHora').value,
+    price: document.getElementById('espPrecio').value || 0,
+    client_name: document.getElementById('espCliente').value.trim(),
+    client_phone: document.getElementById('espTelefono').value.trim(),
+    client_email: document.getElementById('espCorreo').value.trim() || null,
+    payment_status: pagado ? 'paid' : 'pending',
+    sold_by: currentUser.id,
+    paid_at: pagado ? new Date().toISOString() : null,
+  };
+  if(!payload.origin || !payload.destination || !payload.trip_date || !payload.trip_time || !payload.client_name || !payload.client_phone){
+    msg.textContent = 'Completa todos los campos obligatorios.'; return;
+  }
+  const { data, error } = await sb.from('special_trips').insert(payload).select().single();
+  if(error){ msg.textContent = error.message; return; }
+  ['espOrigen','espDestino','espPrecio','espCliente','espTelefono','espCorreo'].forEach(id=>document.getElementById(id).value='');
+  await loadEspeciales();
+  if(pagado) await showTicketForSpecial(data.id);
+  else { msg.style.color='#86efac'; msg.textContent = 'Apartado creado: ' + data.folio; }
+}
+async function marcarPagadoEspecial(id){
+  await sb.from('special_trips').update({ payment_status:'paid', paid_at: new Date().toISOString() }).eq('id', id);
+  if(document.getElementById('view-especiales').classList.contains('active')) await loadEspeciales();
+  if(document.getElementById('view-buscar').classList.contains('active')) await refreshBuscarView();
+  await showTicketForSpecial(id);
+}
+
+// ===================== AGENDA =====================
+async function cargarAgenda(){
+  const desde = document.getElementById('agendaDesde').value || todayStr();
+  document.getElementById('agendaDesde').value = desde;
+  let hasta = document.getElementById('agendaHasta').value;
+  if(!hasta){ const d = new Date(desde+'T00:00:00'); d.setDate(d.getDate()+3); hasta = d.toISOString().slice(0,10); document.getElementById('agendaHasta').value = hasta; }
+  const { data: trips } = await sb.from('trip_instances').select('*, routes(origin,destination)').eq('company_id', currentProfile.company_id).gte('trip_date', desde).lte('trip_date', hasta).order('trip_date').order('departure_time');
+  const content = document.getElementById('agendaContent');
+  if(!trips || !trips.length){ content.innerHTML = '<p class="tag">No hay salidas generadas en este rango de fechas. Ve a "Rutas y precios" para generarlas.</p>'; return; }
+  const tripIds = trips.map(t=>t.id);
+  const { data: bookings } = await sb.from('bookings').select('*').in('trip_instance_id', tripIds).neq('payment_status','cancelled').order('seat_number');
+  const bookingsByTrip = {};
+  (bookings||[]).forEach(b=>{ (bookingsByTrip[b.trip_instance_id] = bookingsByTrip[b.trip_instance_id] || []).push(b); });
+  const byDate = {};
+  trips.forEach(t=>{ (byDate[t.trip_date] = byDate[t.trip_date] || []).push(t); });
+  let html = '';
+  Object.keys(byDate).sort().forEach(date=>{
+    html += `<div class="sectionCard"><h3>${fmtDate(date)}</h3>`;
+    byDate[date].forEach(t=>{
+      const bks = bookingsByTrip[t.id] || [];
+      const pct = Math.round((t.seats_booked/t.total_seats)*100);
+      html += `<div style="margin-bottom:18px">
+        <div class="tripCard">
+          <div class="info"><b>${t.routes.origin} → ${t.routes.destination}</b> · ${fmtTime(t.departure_time)}
+            <div class="seatBar" style="max-width:200px"><div style="width:${pct}%"></div></div>
+            <span class="tag">${t.seats_booked}/${t.total_seats} ocupados · ${money(t.price)}</span>
+          </div>
+        </div>`;
+      if(bks.length){
+        html += `<div class="tableWrap"><table><thead><tr><th>Asiento</th><th>Pasajero</th><th>Teléfono</th><th>Precio</th><th>Estado</th></tr></thead><tbody>`;
+        bks.forEach(b=>{ html += `<tr><td>${b.seat_number||'—'}</td><td>${b.passenger_name}</td><td>${b.passenger_phone}</td><td>${money(b.price)}</td><td><span class="badge ${b.payment_status}">${b.payment_status}</span></td></tr>`; });
+        html += `</tbody></table></div>`;
+      } else {
+        html += `<p class="tag" style="margin:8px 0 0">Sin lugares agendados todavía.</p>`;
+      }
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  content.innerHTML = html;
+}
+async function verPasajerosDeSalida(tripId, rutaLabel, fechaLabel, horaLabel){
+  const { data } = await sb.from('bookings').select('*').eq('trip_instance_id', tripId).neq('payment_status','cancelled').order('seat_number');
+  let html = `<h3>${rutaLabel}</h3><p class="tag">${fechaLabel} · ${horaLabel}</p>`;
+  html += `<div class="tableWrap"><table><thead><tr><th>Asiento</th><th>Pasajero</th><th>Teléfono</th><th>Precio</th><th>Estado</th></tr></thead><tbody>`;
+  (data||[]).forEach(b=>{
+    html += `<tr><td>${b.seat_number||'—'}</td><td>${b.passenger_name}</td><td>${b.passenger_phone}</td><td>${money(b.price)}</td><td><span class="badge ${b.payment_status}">${b.payment_status}</span></td></tr>`;
+  });
+  html += `</tbody></table></div>`;
+  document.getElementById('manifestContent').innerHTML = html;
+  document.getElementById('manifestModal').classList.add('active');
+}
+function closeManifestModal(){ document.getElementById('manifestModal').classList.remove('active'); }
+
+// ===================== BUSCAR / COBRAR =====================
+let buscarLastMode = 'pendientes';
+let buscarLastQuery = '';
+
+async function loadPendientesCobro(){
+  buscarLastMode = 'pendientes';
+  const { data: bookings } = await sb.from('bookings').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))').eq('company_id', currentProfile.company_id).eq('payment_status','pending').order('created_at',{ascending:false}).limit(50);
+  const { data: specials } = await sb.from('special_trips').select('*').eq('company_id', currentProfile.company_id).eq('payment_status','pending').order('created_at',{ascending:false}).limit(50);
+  renderBuscarResults(bookings, specials, true);
+}
+async function buscarReservas(){
+  const q = document.getElementById('buscarQ').value.trim();
+  if(!q){ await loadPendientesCobro(); return; }
+  buscarLastMode = 'query'; buscarLastQuery = q;
+  const { data: bookings } = await sb.from('bookings').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))')
+    .eq('company_id', currentProfile.company_id)
+    .or(`folio.ilike.%${q}%,passenger_name.ilike.%${q}%,passenger_phone.ilike.%${q}%`).limit(30);
+  const { data: specials } = await sb.from('special_trips').select('*')
+    .eq('company_id', currentProfile.company_id)
+    .or(`folio.ilike.%${q}%,client_name.ilike.%${q}%,client_phone.ilike.%${q}%`).limit(30);
+  renderBuscarResults(bookings, specials, false);
+}
+async function refreshBuscarView(){
+  if(buscarLastMode === 'query' && buscarLastQuery) await buscarReservas();
+  else await loadPendientesCobro();
+}
+function renderBuscarResults(bookings, specials, isPendientesView){
+  const tbody = document.querySelector('#tblBuscar tbody');
+  tbody.innerHTML = '';
+  if((!bookings || !bookings.length) && (!specials || !specials.length)){
+    tbody.innerHTML = `<tr><td colspan="8" class="tag">${isPendientesView ? 'No hay apartados pendientes de pago.' : 'Sin resultados.'}</td></tr>`;
+    return;
+  }
+  (bookings||[]).forEach(b=>{
+    const tr = document.createElement('tr');
+    const fecha = b.trip_instances ? fmtDate(b.trip_instances.trip_date)+' '+fmtTime(b.trip_instances.departure_time) : '—';
+    tr.innerHTML = `<td>${b.folio}</td><td>Ruta fija</td><td>${b.passenger_name}</td><td>${b.seat_number||'—'}</td><td>${fecha}</td><td>${money(b.price)}</td><td><span class="badge ${b.payment_status}">${b.payment_status}</span></td>
+      <td>${b.payment_status!=='paid'?`<button class="btn btn-ok btn-sm" onclick="marcarPagadoBooking('${b.id}')">Cobrar</button>`:''} <button class="btn btn-outline btn-sm" onclick="showTicketForBooking('${b.id}')">Ticket</button> ${b.payment_status!=='cancelled'?`<button class="btn btn-danger btn-sm" onclick="cancelarBooking('${b.id}')">Cancelar</button>`:''}</td>`;
+    tbody.appendChild(tr);
+  });
+  (specials||[]).forEach(s=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.folio}</td><td>Especial</td><td>${s.client_name}</td><td>—</td><td>${fmtDate(s.trip_date)} ${fmtTime(s.trip_time)}</td><td>${money(s.price)}</td><td><span class="badge ${s.payment_status}">${s.payment_status}</span></td>
+      <td>${s.payment_status!=='paid'?`<button class="btn btn-ok btn-sm" onclick="marcarPagadoEspecial('${s.id}')">Cobrar</button>`:''} <button class="btn btn-outline btn-sm" onclick="showTicketForSpecial('${s.id}')">Ticket</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+async function marcarPagadoBooking(id){
+  await sb.from('bookings').update({ payment_status:'paid', paid_at: new Date().toISOString() }).eq('id', id);
+  await refreshBuscarView();
+  await showTicketForBooking(id);
+}
+async function cancelarBooking(id){
+  if(!confirm('¿Cancelar esta reserva?')) return;
+  await sb.from('bookings').update({ payment_status:'cancelled' }).eq('id', id);
+  await refreshBuscarView();
+}
+
+// ===================== TICKETS =====================
+function ticketHtml({folio, ruta, fecha, hora, pasajero, telefono, precio, asiento}){
+  const biz = businessSettings || {};
+  return `
+    <div class="ticket">
+      ${biz.logo_url ? `<img src="${biz.logo_url}" style="max-height:50px;margin-bottom:8px">` : ''}
+      <h2>${biz.business_name || 'Viajes'}</h2>
+      <div style="font-size:11px;color:#555">${biz.address||''} ${biz.phone? '· Tel. '+biz.phone : ''}</div>
+      <div class="folio">Folio: <b>${folio}</b></div>
+      <hr>
+      <table>
+        <tr><td>Ruta</td><td style="text-align:right"><b>${ruta}</b></td></tr>
+        <tr><td>Fecha</td><td style="text-align:right">${fecha}</td></tr>
+        <tr><td>Hora</td><td style="text-align:right">${hora}</td></tr>
+        <tr><td>Pasajero</td><td style="text-align:right">${pasajero}</td></tr>
+        <tr><td>Teléfono</td><td style="text-align:right">${telefono}</td></tr>
+        ${asiento ? `<tr><td>Asiento</td><td style="text-align:right"><b>${asiento}</b></td></tr>` : ''}
+        <tr><td>Precio</td><td style="text-align:right"><b>${money(precio)}</b></td></tr>
+      </table>
+      <hr>
+      <div class="qrWrap"><img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(folio)}" width="140" height="140"></div>
+      <div style="text-align:center;font-size:11px;color:#777;margin-top:8px">Presenta este ticket al abordar</div>
+    </div>`;
+}
+async function showTicketForBooking(id){
+  const { data: b } = await sb.from('bookings').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))').eq('id', id).single();
+  if(!b) return;
+  await sb.from('bookings').update({ ticket_generated:true }).eq('id', id);
+  const ruta = b.trip_instances ? (b.trip_instances.routes.origin+' → '+b.trip_instances.routes.destination) : '—';
+  document.getElementById('ticketContent').innerHTML = ticketHtml({
+    folio:b.folio, ruta, fecha: fmtDate(b.trip_instances?.trip_date), hora: fmtTime(b.trip_instances?.departure_time),
+    pasajero:b.passenger_name, telefono:b.passenger_phone, precio:b.price, asiento:b.seat_number
+  });
+  document.getElementById('ticketModal').classList.add('active');
+}
+async function showTicketForSpecial(id){
+  const { data: s } = await sb.from('special_trips').select('*').eq('id', id).single();
+  if(!s) return;
+  await sb.from('special_trips').update({ ticket_generated:true }).eq('id', id);
+  document.getElementById('ticketContent').innerHTML = ticketHtml({
+    folio:s.folio, ruta: s.origin+' → '+s.destination, fecha: fmtDate(s.trip_date), hora: fmtTime(s.trip_time),
+    pasajero:s.client_name, telefono:s.client_phone, precio:s.price
+  });
+  document.getElementById('ticketModal').classList.add('active');
+}
+function closeTicketModal(){ document.getElementById('ticketModal').classList.remove('active'); }
+
+// ===================== CHOFER: CHECK-IN + GPS =====================
+let gpsWatchId = null;
+let gpsCurrentCheckinId = null;
+let gpsLastSentAt = 0;
+
+async function getActiveCheckin(){
+  const { data, error } = await sb.from('driver_checkins')
+    .select('*, trip_instances(trip_date,departure_time,routes(origin,destination))')
+    .eq('driver_id', currentUser.id)
+    .eq('company_id', currentProfile.company_id)
+    .in('status',['pending','approved'])
+    .order('created_at',{ascending:false})
+    .limit(1);
+  if(error){ console.error('getActiveCheckin error:', error); return null; }
+  return (data && data[0]) || null;
+}
+async function loadCheckin(){
+  const active = await getActiveCheckin();
+  const box = document.getElementById('checkinActiveBox');
+
+  if(active && active.status === 'pending'){
+    stopGpsTracking();
+    box.innerHTML = `<h3>Solicitud enviada</h3>
+      <p>${active.trip_instances.routes.origin} → ${active.trip_instances.routes.destination}<br>
+      ${fmtDate(active.trip_instances.trip_date)} · ${fmtTime(active.trip_instances.departure_time)}<br>
+      Solicitado: ${new Date(active.requested_at).toLocaleTimeString('es-MX')}</p>
+      <p class="tag">Esperando aprobación de un administrador o vendedor...</p>
+      <button class="btn btn-outline btn-sm" onclick="cancelarSolicitud('${active.id}')">Cancelar solicitud</button>`;
+  } else if(active && active.status === 'approved'){
+    box.innerHTML = `<h3>Turno activo</h3>
+      <p>${active.trip_instances.routes.origin} → ${active.trip_instances.routes.destination}<br>
+      ${fmtDate(active.trip_instances.trip_date)} · ${fmtTime(active.trip_instances.departure_time)}<br>
+      Salida aprobada: ${new Date(active.approved_at).toLocaleTimeString('es-MX')}</p>
+      <div class="gpsStatus" id="gpsStatusLine"><span class="liveDot"></span> Compartiendo ubicación en vivo...</div>
+      <div style="margin-top:12px"><button class="btn btn-danger" onclick="hacerCheckout('${active.id}')">Hacer check-out</button></div>`;
+    startGpsTracking(active.id, active.trip_instance_id);
+  } else {
+    stopGpsTracking();
+    box.innerHTML = `<h3>Sin turno activo</h3><p class="tag">Selecciona una salida de la lista para solicitar tu check-in.</p>`;
+  }
+
+  const today = todayStr();
+  const { data: trips, error } = await sb.from('trip_instances')
+    .select('*, routes(origin,destination)')
+    .eq('company_id', currentProfile.company_id)
+    .eq('trip_date', today)
+    .order('departure_time');
+
+  if(error){
+    console.error('Error cargando salidas del chofer:', error);
+    document.querySelector('#tblSalidasChofer tbody').innerHTML =
+      `<tr><td colspan="4" class="tag" style="color:#fca5a5">Error: ${error.message}</td></tr>`;
+    return;
+  }
+  const tbody = document.querySelector('#tblSalidasChofer tbody');
+  tbody.innerHTML = '';
+  if(!trips || !trips.length){
+    tbody.innerHTML = '<tr><td colspan="4" class="tag">No hay salidas generadas para hoy en tu empresa. Pide al administrador que las genere desde "Rutas y precios".</td></tr>';
+    return;
+  }
+  trips.forEach(t=>{
+    const tr = document.createElement('tr');
+    const disabled = active ? 'disabled' : '';
+    tr.innerHTML = `<td>${t.routes.origin} → ${t.routes.destination}</td>
+      <td>${fmtTime(t.departure_time)}</td>
+      <td>${t.seats_booked}/${t.total_seats}</td>
+      <td><button class="btn btn-primary btn-sm" ${disabled} onclick="hacerCheckin('${t.id}')">Solicitar salida</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+async function hacerCheckin(tripId){
+  const { error } = await sb.from('driver_checkins').insert({
+    driver_id: currentUser.id,
+    trip_instance_id: tripId,
+    company_id: currentProfile.company_id,
+    status: 'pending'
+  });
+  if(error){ alert('No se pudo solicitar la salida:\n' + error.message); console.error(error); return; }
+  await loadCheckin();
+}
+async function cancelarSolicitud(id){
+  if(!confirm('¿Cancelar esta solicitud de salida?')) return;
+  await sb.from('driver_checkins').delete().eq('id', id);
+  await loadCheckin();
+}
+async function hacerCheckout(checkinId){
+  stopGpsTracking();
+  const { error } = await sb.rpc('complete_checkout', { p_checkin_id: checkinId });
+  if(error){ alert(error.message); }
+  await loadCheckin();
+}
+function startGpsTracking(checkinId, tripInstanceId){
+  if(gpsWatchId !== null && gpsCurrentCheckinId === checkinId) return;
+  stopGpsTracking();
+  if(!navigator.geolocation){
+    const el = document.getElementById('gpsStatusLine');
+    if(el) el.textContent = 'Este dispositivo no soporta GPS.';
+    return;
+  }
+  gpsCurrentCheckinId = checkinId;
+  gpsWatchId = navigator.geolocation.watchPosition(async (pos)=>{
+    const now = Date.now();
+    if(now - gpsLastSentAt < 12000) return;
+    gpsLastSentAt = now;
+    const { latitude, longitude, speed, heading, accuracy } = pos.coords;
+    await sb.from('driver_locations').insert({
+      checkin_id: checkinId, driver_id: currentUser.id, trip_instance_id: tripInstanceId,
+      company_id: currentProfile.company_id,
+      latitude, longitude, speed_kmh: speed ? Math.round(speed*3.6) : null, heading, accuracy_m: accuracy
+    });
+    const el = document.getElementById('gpsStatusLine');
+    if(el) el.innerHTML = `<span class="liveDot"></span> Última ubicación enviada: ${new Date().toLocaleTimeString('es-MX')}`;
+  }, (err)=>{
+    const el = document.getElementById('gpsStatusLine');
+    if(el) el.textContent = 'No se pudo acceder al GPS: ' + err.message;
+  }, { enableHighAccuracy:true, maximumAge:5000, timeout:20000 });
+}
+function stopGpsTracking(){
+  if(gpsWatchId !== null){ navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
+  gpsCurrentCheckinId = null;
+}
+async function loadPasajeros(){
+  const active = await getActiveCheckin();
+  const box = document.getElementById('pasajerosBox');
+  if(!active){
+    box.innerHTML = '<p class="tag">No tienes ninguna salida solicitada. Ve a "Check-in / Check-out" para solicitar una.</p>';
+    return;
+  }
+  const { data: bookings, error } = await sb.from('bookings')
+    .select('*')
+    .eq('trip_instance_id', active.trip_instance_id)
+    .eq('company_id', currentProfile.company_id)
+    .eq('payment_status','paid')
+    .order('seat_number');
+  if(error){ box.innerHTML = `<p class="tag" style="color:#fca5a5">Error: ${error.message}</p>`; return; }
+  let html = `<h3>${active.trip_instances.routes.origin} → ${active.trip_instances.routes.destination} · ${fmtTime(active.trip_instances.departure_time)}</h3>`;
+  if(active.status === 'pending'){
+    html += `<p class="tag" style="margin-bottom:10px">Tu salida aún no ha sido aprobada — esta es la lista preliminar de pasajeros confirmados.</p>`;
+  }
+  html += `<div class="tableWrap"><table><thead><tr><th>Asiento</th><th>Pasajero</th><th>Teléfono</th><th>Lugar de abordaje</th></tr></thead><tbody>`;
+  (bookings||[]).forEach(b=>{
+    html += `<tr><td>${b.seat_number||'—'}</td><td>${b.passenger_name}</td><td>${b.passenger_phone}</td><td>${b.boarding_point||'—'}</td></tr>`;
+  });
+  html += `</tbody></table></div>`;
+  if(!bookings || !bookings.length){
+    html += '<p class="tag" style="margin-top:10px">Aún no hay pasajeros con pago confirmado para esta salida.</p>';
+  }
+  box.innerHTML = html;
+}
+
+// ===================== CHOFER: GASTOS =====================
+const CASETAS_CONOCIDAS = ['Autopista Saltillo', 'La Carbonera', 'Los Chorros'];
+let gastosSelectedType = null;
+let gastosCurrentCheckin = null;
+
+async function getLatestCheckinForExpenses(){
+  const { data, error } = await sb.from('driver_checkins')
+    .select('*, trip_instances(trip_date,departure_time,routes(origin,destination))')
+    .eq('driver_id', currentUser.id)
+    .eq('company_id', currentProfile.company_id)
+    .order('created_at',{ascending:false})
+    .limit(1);
+  if(error){ console.error(error); return null; }
+  return (data && data[0]) || null;
+}
+async function loadGastos(){
+  gastosCurrentCheckin = await getLatestCheckinForExpenses();
+  const ctxBox = document.getElementById('gastosContextBox');
+  const formBox = document.getElementById('gastosFormBox');
+  if(!gastosCurrentCheckin){
+    ctxBox.innerHTML = '<p class="tag">Aún no tienes ninguna salida registrada. Haz check-in primero.</p>';
+    formBox.innerHTML = '';
+    document.querySelector('#tblGastos tbody').innerHTML = '';
+    document.getElementById('gastosTotal').textContent = '';
+    return;
+  }
+  const c = gastosCurrentCheckin;
+  ctxBox.innerHTML = `<h3>Salida: ${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination}</h3>
+    <p class="tag">${fmtDate(c.trip_instances.trip_date)} · ${fmtTime(c.trip_instances.departure_time)} · Estado: <span class="badge ${c.status==='checked_out'?'paid':(c.status==='rejected'?'cancelled':'pending')}">${c.status}</span></p>`;
+  renderGastosForm();
+  await refreshGastosList();
+}
+function renderGastosForm(){
+  const formBox = document.getElementById('gastosFormBox');
+  formBox.innerHTML = `
+    <h3>Agregar gasto</h3>
+    <div class="expenseTypeBtns">
+      <button type="button" class="expTypeBtn ${gastosSelectedType==='gasolina_verde'?'active':''}" onclick="selectGastoTipo('gasolina_verde')">⛽ Gasolina Verde</button>
+      <button type="button" class="expTypeBtn ${gastosSelectedType==='gasolina_roja'?'active':''}" onclick="selectGastoTipo('gasolina_roja')">⛽ Gasolina Roja</button>
+      <button type="button" class="expTypeBtn ${gastosSelectedType==='caseta'?'active':''}" onclick="selectGastoTipo('caseta')">🛣️ Caseta</button>
+      <button type="button" class="expTypeBtn ${gastosSelectedType==='otro'?'active':''}" onclick="selectGastoTipo('otro')">➕ Otro gasto</button>
+    </div>
+    <div id="gastoDetalleWrap"></div>
+    <div class="formRow" style="margin-top:12px">
+      <div class="field" style="max-width:160px"><label>Monto</label><input type="number" id="gastoMonto" step="0.01" min="0"></div>
+      <div class="field"><label>Nota (opcional)</label><input id="gastoNota" placeholder="Ej. ticket #1234"></div>
+    </div>
+    <div style="margin-top:14px"><button class="btn btn-primary" onclick="guardarGasto()">Agregar gasto</button></div>
+    <div class="errorMsg" id="gastoMsg"></div>`;
+  renderGastoDetalle();
+}
+function selectGastoTipo(tipo){ gastosSelectedType = tipo; renderGastosForm(); }
+function renderGastoDetalle(){
+  const wrap = document.getElementById('gastoDetalleWrap');
+  if(!wrap) return;
+  if(gastosSelectedType === 'caseta'){
+    wrap.innerHTML = `
+      <div class="casetaBtns">${CASETAS_CONOCIDAS.map(c=>`<button type="button" class="capBtn" onclick="document.getElementById('gastoLabel').value='${c}'">${c}</button>`).join('')}</div>
+      <div class="field"><label>Nombre de la caseta</label><input id="gastoLabel" placeholder="Ej. Autopista Saltillo"></div>`;
+  } else if(gastosSelectedType === 'otro'){
+    wrap.innerHTML = `<div class="field"><label>Descripción del gasto</label><input id="gastoLabel"></div>`;
+  } else if(gastosSelectedType === 'gasolina_verde' || gastosSelectedType === 'gasolina_roja'){
+    wrap.innerHTML = `<p class="tag">${gastosSelectedType==='gasolina_verde' ? 'Gasolina Magna (verde)' : 'Gasolina Premium (roja)'}</p>`;
+  } else {
+    wrap.innerHTML = `<p class="tag">Selecciona el tipo de gasto arriba.</p>`;
+  }
+}
+async function guardarGasto(){
+  const msg = document.getElementById('gastoMsg'); msg.textContent = '';
+  if(!gastosSelectedType){ msg.textContent = 'Selecciona el tipo de gasto.'; return; }
+  const monto = document.getElementById('gastoMonto').value;
+  if(!monto || Number(monto) <= 0){ msg.textContent = 'Indica un monto válido.'; return; }
+  let label = null;
+  if(gastosSelectedType === 'caseta' || gastosSelectedType === 'otro'){
+    label = document.getElementById('gastoLabel')?.value.trim();
+    if(!label){ msg.textContent = gastosSelectedType === 'caseta' ? 'Indica el nombre de la caseta.' : 'Describe el gasto.'; return; }
+  }
+  const nota = document.getElementById('gastoNota').value.trim();
+  const payload = {
+    checkin_id: gastosCurrentCheckin.id,
+    driver_id: currentUser.id,
+    company_id: currentProfile.company_id,
+    expense_type: gastosSelectedType,
+    label: label,
+    amount: monto,
+    notes: nota || null,
+  };
+  const { error } = await sb.from('trip_expenses').insert(payload);
+  if(error){ msg.textContent = error.message; return; }
+  document.getElementById('gastoMonto').value = '';
+  document.getElementById('gastoNota').value = '';
+  gastosSelectedType = null;
+  renderGastosForm();
+  await refreshGastosList();
+}
+async function refreshGastosList(){
+  const { data } = await sb.from('trip_expenses').select('*').eq('checkin_id', gastosCurrentCheckin.id).order('created_at',{ascending:false});
+  const tbody = document.querySelector('#tblGastos tbody');
+  tbody.innerHTML = '';
+  const labels = { gasolina_verde:'⛽ Gasolina Verde', gasolina_roja:'⛽ Gasolina Roja', caseta:'🛣️ Caseta', otro:'➕ Otro' };
+  let total = 0;
+  (data||[]).forEach(g=>{
+    total += Number(g.amount);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${labels[g.expense_type]||g.expense_type}</td><td>${g.label || g.notes || '—'}</td><td>${money(g.amount)}</td><td>${new Date(g.created_at).toLocaleTimeString('es-MX')}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="eliminarGasto('${g.id}')">Eliminar</button></td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('gastosTotal').textContent = data && data.length ? `total: ${money(total)}` : '';
+  if(!data || !data.length) tbody.innerHTML = '<tr><td colspan="5" class="tag">Aún no has registrado gastos para esta salida.</td></tr>';
+}
+async function eliminarGasto(id){
+  if(!confirm('¿Eliminar este gasto?')) return;
+  await sb.from('trip_expenses').delete().eq('id', id);
+  await refreshGastosList();
+}
+
+// ===================== MONITOREO =====================
+let liveMap = null;
+let mapMarkers = {};
+let monitoreoChannel = null;
+
+async function loadMonitoreo(){
+  await refreshPendingList();
+  await refreshActiveTrips();
+  ensureMonitoreoRealtime();
+}
+async function refreshPendingList(){
+  const { data } = await sb.from('driver_checkins')
+    .select('*, profiles!driver_checkins_driver_id_fkey(full_name), trip_instances(trip_date,departure_time,routes(origin,destination))')
+    .eq('company_id', currentProfile.company_id)
+    .eq('status','pending').order('requested_at');
+  const wrap = document.getElementById('pendingList');
+  document.getElementById('pendingCount').textContent = data && data.length ? `(${data.length})` : '';
+  if(!data || !data.length){ wrap.innerHTML = '<p class="tag">No hay solicitudes pendientes.</p>'; return; }
+  wrap.innerHTML = '';
+  data.forEach(c=>{
+    const div = document.createElement('div');
+    div.className = 'pendingCard';
+    div.innerHTML = `<div class="info"><b>${c.profiles.full_name}</b>${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination} · ${fmtDate(c.trip_instances.trip_date)} ${fmtTime(c.trip_instances.departure_time)}<br>
+      <span class="tag">Solicitado ${new Date(c.requested_at).toLocaleTimeString('es-MX')}</span></div>
+      <div><button class="btn btn-ok btn-sm" onclick="approveCheckin('${c.id}')">Aprobar salida</button> <button class="btn btn-danger btn-sm" onclick="rejectCheckin('${c.id}')">Rechazar</button></div>`;
+    wrap.appendChild(div);
+  });
+}
+async function refreshActiveTrips(){
+  const { data } = await sb.from('driver_checkins')
+    .select('*, profiles!driver_checkins_driver_id_fkey(full_name), trip_instances(trip_date,departure_time,routes(origin,destination))')
+    .eq('company_id', currentProfile.company_id)
+    .eq('status','approved').order('approved_at',{ascending:false});
+  const wrap = document.getElementById('activeTripsList');
+  document.getElementById('activeTripsCount').textContent = data && data.length ? `(${data.length})` : '';
+  if(!data || !data.length){
+    wrap.innerHTML = '<p class="tag">No hay viajes en curso.</p>';
+    if(liveMap) clearMapMarkers();
+    return;
+  }
+  wrap.innerHTML = '';
+  for(const c of data){
+    const div = document.createElement('div');
+    div.className = 'tripCard';
+    div.innerHTML = `<div class="info"><span class="liveDot"></span><b>${c.profiles.full_name}</b> — ${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination}<br>
+      <span class="tag">Salió ${new Date(c.approved_at).toLocaleTimeString('es-MX')}</span></div>
+      <div><button class="btn btn-outline btn-sm" onclick="hacerCheckoutAdmin('${c.id}')">Marcar llegada</button></div>`;
+    wrap.appendChild(div);
+  }
+  await updateMapForActiveTrips(data);
+}
+async function hacerCheckoutAdmin(checkinId){
+  if(!confirm('¿Marcar esta unidad como llegada?')) return;
+  const { error } = await sb.rpc('complete_checkout', { p_checkin_id: checkinId });
+  if(error){ alert(error.message); }
+  await loadMonitoreo();
+}
+async function approveCheckin(id){
+  const { error } = await sb.from('driver_checkins').update({ status:'approved', approved_by: currentUser.id, approved_at: new Date().toISOString() }).eq('id', id);
+  if(error){ alert(error.message); return; }
+  await loadMonitoreo();
+}
+async function rejectCheckin(id){
+  const reason = prompt('Motivo del rechazo (opcional):') || null;
+  const { error } = await sb.from('driver_checkins').update({ status:'rejected', rejected_by: currentUser.id, rejected_at: new Date().toISOString(), rejected_reason: reason }).eq('id', id);
+  if(error){ alert(error.message); return; }
+  await loadMonitoreo();
+}
+function ensureLiveMap(){
+  if(liveMap) { setTimeout(()=>liveMap.invalidateSize(), 100); return; }
+  liveMap = L.map('liveMap', { zoomControl:true }).setView([23.6, -100.5], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap', maxZoom: 18 }).addTo(liveMap);
+  setTimeout(()=>liveMap.invalidateSize(), 150);
+}
+function clearMapMarkers(){
+  Object.values(mapMarkers).forEach(m=>liveMap && liveMap.removeLayer(m));
+  mapMarkers = {};
+}
+async function updateMapForActiveTrips(checkins){
+  ensureLiveMap();
+  const seen = new Set();
+  const bounds = [];
+  for(const c of checkins){
+    const { data: locs } = await sb.from('driver_locations').select('*').eq('checkin_id', c.id).order('recorded_at',{ascending:false}).limit(1);
+    if(!locs || !locs.length) continue;
+    const loc = locs[0];
+    seen.add(c.id);
+    const label = `${c.profiles.full_name} · ${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination}<br><span style="font-size:11px;color:#666">Actualizado ${new Date(loc.recorded_at).toLocaleTimeString('es-MX')}</span>`;
+    if(mapMarkers[c.id]){
+      mapMarkers[c.id].setLatLng([loc.latitude, loc.longitude]);
+      mapMarkers[c.id].setPopupContent(label);
+    } else {
+      mapMarkers[c.id] = L.marker([loc.latitude, loc.longitude]).addTo(liveMap).bindPopup(label);
+    }
+    bounds.push([loc.latitude, loc.longitude]);
+  }
+  Object.keys(mapMarkers).forEach(id=>{ if(!seen.has(id)){ liveMap.removeLayer(mapMarkers[id]); delete mapMarkers[id]; } });
+  if(bounds.length === 1) liveMap.setView(bounds[0], 13);
+  else if(bounds.length > 1) liveMap.fitBounds(bounds, { padding:[30,30] });
+  document.getElementById('mapUpdatedAt').textContent = 'actualizado ' + new Date().toLocaleTimeString('es-MX');
+}
+function ensureMonitoreoRealtime(){
+  if(monitoreoChannel) return;
+  monitoreoChannel = sb.channel('monitoreo-live')
+    .on('postgres_changes', { event:'*', schema:'public', table:'driver_checkins' }, ()=>{ refreshPendingList(); refreshActiveTrips(); })
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'driver_locations' }, ()=>{ refreshActiveTrips(); })
+    .subscribe();
+}
+
+// ===================== HISTORIAL =====================
+let chartIngresos = null;
+let chartRutas = null;
+async function loadHistorial(){
+  const desdeEl = document.getElementById('histDesde');
+  const hastaEl = document.getElementById('histHasta');
+  if(!desdeEl.value){ const d=new Date(); d.setDate(d.getDate()-30); desdeEl.value = d.toISOString().slice(0,10); }
+  if(!hastaEl.value){ hastaEl.value = todayStr(); }
+  const desde = desdeEl.value, hasta = hastaEl.value;
+  const cid = currentProfile.company_id;
+  const { data: bookings } = await sb.from('bookings').select('price,payment_status,created_at, trip_instances(trip_date, routes(origin,destination))').eq('company_id', cid).gte('created_at', desde+'T00:00:00').lte('created_at', hasta+'T23:59:59');
+  const { data: specials } = await sb.from('special_trips').select('price,payment_status,created_at,origin,destination').eq('company_id', cid).gte('created_at', desde+'T00:00:00').lte('created_at', hasta+'T23:59:59');
+  const all = [...(bookings||[]).map(b=>({...b, ruta: b.trip_instances ? (b.trip_instances.routes.origin+' → '+b.trip_instances.routes.destination) : 'Especial'})), ...(specials||[]).map(s=>({...s, ruta: s.origin+' → '+s.destination}))];
+  const ventas = all.length;
+  const ingresos = all.filter(x=>x.payment_status==='paid').reduce((a,b)=>a+Number(b.price||0),0);
+  const { data: trips } = await sb.from('trip_instances').select('total_seats,seats_booked,status').eq('company_id', cid).gte('trip_date', desde).lte('trip_date', hasta);
+  const completadas = (trips||[]).filter(t=>t.status==='completed').length;
+  const ocupacionProm = (trips && trips.length) ? Math.round((trips.reduce((a,t)=>a+(t.seats_booked/t.total_seats),0)/trips.length)*100) : 0;
+  document.getElementById('hist-ventas').textContent = ventas;
+  document.getElementById('hist-ingresos').textContent = money(ingresos);
+  document.getElementById('hist-completadas').textContent = completadas;
+  document.getElementById('hist-ocupacion').textContent = ocupacionProm + '%';
+
+  const porDia = {};
+  all.filter(x=>x.payment_status==='paid').forEach(x=>{ const d = x.created_at.slice(0,10); porDia[d] = (porDia[d]||0) + Number(x.price||0); });
+  const diasOrdenados = Object.keys(porDia).sort();
+  const ctxIng = document.getElementById('chartIngresos').getContext('2d');
+  if(chartIngresos) chartIngresos.destroy();
+  chartIngresos = new Chart(ctxIng, {
+    type:'line',
+    data:{ labels: diasOrdenados.map(d=>fmtDate(d)), datasets:[{ label:'Ingresos', data: diasOrdenados.map(d=>porDia[d]), borderColor:'#2f8fff', backgroundColor:'rgba(47,143,255,.15)', tension:.3, fill:true }] },
+    options:{ plugins:{ legend:{display:false} }, scales:{ x:{ ticks:{color:'#8ea0c4'}, grid:{color:'#233150'} }, y:{ ticks:{color:'#8ea0c4'}, grid:{color:'#233150'} } } }
+  });
+
+  const porRuta = {};
+  all.forEach(x=>{ porRuta[x.ruta] = (porRuta[x.ruta]||0) + 1; });
+  const rutasOrdenadas = Object.keys(porRuta).sort((a,b)=>porRuta[b]-porRuta[a]);
+  const ctxRuta = document.getElementById('chartRutas').getContext('2d');
+  if(chartRutas) chartRutas.destroy();
+  chartRutas = new Chart(ctxRuta, {
+    type:'bar',
+    data:{ labels: rutasOrdenadas, datasets:[{ label:'Ventas', data: rutasOrdenadas.map(r=>porRuta[r]), backgroundColor:'#22d3c5' }] },
+    options:{ plugins:{ legend:{display:false} }, scales:{ x:{ ticks:{color:'#8ea0c4'}, grid:{display:false} }, y:{ ticks:{color:'#8ea0c4'}, grid:{color:'#233150'} } } }
+  });
+
+  const { data: expenses } = await sb.from('trip_expenses')
+    .select('*, profiles(full_name), trip_instances(routes(origin,destination))')
+    .eq('company_id', cid)
+    .gte('created_at', desde+'T00:00:00').lte('created_at', hasta+'T23:59:59')
+    .order('created_at',{ascending:false}).limit(300);
+  const expLabels = { gasolina_verde:'⛽ Gasolina Verde', gasolina_roja:'⛽ Gasolina Roja', caseta:'🛣️ Caseta', otro:'➕ Otro' };
+  let gastoTotal = 0; const porTipo = { gasolina:0, caseta:0, otro:0 };
+  (expenses||[]).forEach(e=>{
+    const m = Number(e.amount);
+    gastoTotal += m;
+    if(e.expense_type === 'caseta') porTipo.caseta += m;
+    else if(e.expense_type === 'otro') porTipo.otro += m;
+    else porTipo.gasolina += m;
+  });
+  document.getElementById('hist-gastos').textContent = money(gastoTotal);
+  document.getElementById('hist-gastosDesglose').textContent = `⛽ ${money(porTipo.gasolina)} · 🛣️ ${money(porTipo.caseta)} · ➕ ${money(porTipo.otro)}`;
+  const tbodyGastos = document.querySelector('#tblHistGastos tbody');
+  tbodyGastos.innerHTML = '';
+  (expenses||[]).forEach(e=>{
+    const tr = document.createElement('tr');
+    const ruta = e.trip_instances ? (e.trip_instances.routes.origin+' → '+e.trip_instances.routes.destination) : '—';
+    tr.innerHTML = `<td>${e.profiles?.full_name || '—'}</td><td>${ruta}</td><td>${expLabels[e.expense_type]||e.expense_type}</td><td>${e.label || e.notes || '—'}</td><td>${money(e.amount)}</td><td>${new Date(e.created_at).toLocaleString('es-MX')}</td>`;
+    tbodyGastos.appendChild(tr);
+  });
+  if(!expenses || !expenses.length) tbodyGastos.innerHTML = '<tr><td colspan="6" class="tag">Sin gastos registrados.</td></tr>';
+
+  const { data: checkins } = await sb.from('driver_checkins')
+    .select('*, profiles!driver_checkins_driver_id_fkey(full_name), trip_instances(trip_date,routes(origin,destination))')
+    .eq('company_id', cid)
+    .gte('created_at', desde+'T00:00:00').lte('created_at', hasta+'T23:59:59')
+    .order('created_at',{ascending:false}).limit(200);
+  const tbody = document.querySelector('#tblHistCheckins tbody');
+  tbody.innerHTML = '';
+  (checkins||[]).forEach(c=>{
+    const tr = document.createElement('tr');
+    const salidaLlegada = (c.approved_at ? new Date(c.approved_at).toLocaleTimeString('es-MX') : '—') + ' → ' + (c.check_out_at ? new Date(c.check_out_at).toLocaleTimeString('es-MX') : '—');
+    tr.innerHTML = `<td>${c.profiles.full_name}</td><td>${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination}</td><td>${fmtDate(c.trip_instances.trip_date)}</td>
+      <td>${new Date(c.requested_at).toLocaleTimeString('es-MX')}</td><td>${c.approved_at ? new Date(c.approved_at).toLocaleTimeString('es-MX') : '—'}</td>
+      <td>${salidaLlegada}</td><td><span class="badge ${c.status==='checked_out'?'paid':(c.status==='rejected'?'cancelled':'pending')}">${c.status}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ===================== MASTER: EMPRESAS =====================
+async function loadEmpresas(){
+  const { data: companies } = await sb.from('companies').select('*').order('created_at',{ascending:false});
+  const tbody = document.querySelector('#tblEmpresas tbody');
+  tbody.innerHTML = '';
+  for(const c of (companies||[])){
+    const { count: userCount } = await sb.from('profiles').select('*',{count:'exact',head:true}).eq('company_id', c.id);
+    const { data: bookings } = await sb.from('bookings').select('price,payment_status').eq('company_id', c.id);
+    const { data: specials } = await sb.from('special_trips').select('price,payment_status').eq('company_id', c.id);
+    const all = [...(bookings||[]), ...(specials||[])];
+    const ventas = all.length;
+    const ingresos = all.filter(x=>x.payment_status==='paid').reduce((a,b)=>a+Number(b.price||0),0);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><b>${c.name}</b></td><td>${userCount||0}</td><td>${ventas}</td><td>${money(ingresos)}</td>
+      <td>${c.active? '<span class="badge paid">Activa</span>' : '<span class="badge cancelled">Inactiva</span>'}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="verSoporteDeEmpresa('${c.id}')">Ver detalle</button>
+        <button class="btn btn-outline btn-sm" onclick="copiarRutasAEmpresa('${c.id}', '${c.name.replace(/'/g,"\\'")}')">Copiar mis rutas</button>
+        <button class="btn ${c.active?'btn-danger':'btn-ok'} btn-sm" onclick="toggleCompanyActive('${c.id}', ${!c.active})">${c.active?'Desactivar':'Activar'}</button>
+      </td>`;
+    tbody.appendChild(tr);
+  }
+  if(!companies || !companies.length) tbody.innerHTML = '<tr><td colspan="6" class="tag">Aún no hay empresas registradas.</td></tr>';
+}
+const TEMPLATE_COMPANY_ID = 'f2969a74-03f0-47ee-8e87-32633a22011e';
+async function copiarRutasAEmpresa(companyId, companyName){
+  if(companyId === TEMPLATE_COMPANY_ID){ alert('Esta es la empresa plantilla.'); return; }
+  if(!confirm(`¿Copiar tus rutas y horarios a "${companyName}"?`)) return;
+  const { data, error } = await sb.rpc('clone_template_routes', { p_source_company: TEMPLATE_COMPANY_ID, p_target_company: companyId });
+  if(error){ alert(error.message); return; }
+  alert(data > 0 ? `Se copiaron ${data} ruta(s) nueva(s) con sus horarios.` : 'Esa empresa ya tenía todas esas rutas.');
+  if(document.getElementById('view-soporte').classList.contains('active')) await loadSoporte();
+  else await loadEmpresas();
+}
+async function toggleCompanyActive(id, active){
+  await sb.from('companies').update({ active }).eq('id', id);
+  await loadEmpresas();
+}
+function openCompanyModal(){ document.getElementById('companyModal').classList.add('active'); document.getElementById('ncMsg').textContent=''; }
+function closeCompanyModal(){ document.getElementById('companyModal').classList.remove('active'); }
+async function crearEmpresa(){
+  const msg = document.getElementById('ncMsg'); msg.textContent = '';
+  const payload = {
+    company_name: document.getElementById('ncNombre').value.trim(),
+    business_name: document.getElementById('ncNombreNegocio').value.trim(),
+    admin_full_name: document.getElementById('ncAdminNombre').value.trim(),
+    admin_email: document.getElementById('ncAdminEmail').value.trim(),
+    admin_password: document.getElementById('ncAdminPassword').value,
+    admin_phone: document.getElementById('ncAdminPhone').value.trim(),
+    clone_template: document.getElementById('ncCloneTemplate').checked,
+  };
+  if(!payload.company_name || !payload.admin_full_name || !payload.admin_email || !payload.admin_password){
+    msg.textContent = 'Completa todos los campos obligatorios.'; return;
+  }
+  const { data: { session } } = await sb.auth.getSession();
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/master-create-company', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if(!res.ok){ msg.textContent = json.error || 'Error al crear la empresa.'; return; }
+    closeCompanyModal();
+    ['ncNombre','ncNombreNegocio','ncAdminNombre','ncAdminEmail','ncAdminPassword','ncAdminPhone'].forEach(id=>document.getElementById(id).value='');
+    await loadEmpresas();
+  }catch(e){ msg.textContent = 'Error de conexión: ' + e.message; }
+}
+async function verSoporteDeEmpresa(companyId){
+  await goToView('soporte');
+  document.getElementById('soporteEmpresa').value = companyId;
+  await loadSoporte();
+}
+
+// ===================== MASTER: SOPORTE =====================
+async function loadSoporteEmpresas(){
+  const { data: companies } = await sb.from('companies').select('*').order('name');
+  const sel = document.getElementById('soporteEmpresa');
+  const prevValue = sel.value;
+  sel.innerHTML = '<option value="">Selecciona una empresa...</option>' + (companies||[]).map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  if(prevValue) sel.value = prevValue;
+}
+async function loadSoporte(){
+  const companyId = document.getElementById('soporteEmpresa').value;
+  const content = document.getElementById('soporteContent');
+  if(!companyId){ content.innerHTML = '<p class="tag">Selecciona una empresa para ver su información.</p>'; return; }
+
+  const { data: settings } = await sb.from('business_settings').select('*').eq('company_id', companyId).maybeSingle();
+  const { data: users } = await sb.from('profiles').select('*').eq('company_id', companyId).order('role');
+  const { data: bookings } = await sb.from('bookings').select('*, trip_instances(trip_date,departure_time,routes(origin,destination))').eq('company_id', companyId).order('created_at',{ascending:false}).limit(30);
+  const { data: specials } = await sb.from('special_trips').select('*').eq('company_id', companyId).order('created_at',{ascending:false}).limit(30);
+  const { data: checkins } = await sb.from('driver_checkins').select('*, profiles!driver_checkins_driver_id_fkey(full_name), trip_instances(trip_date,routes(origin,destination))').eq('company_id', companyId).order('created_at',{ascending:false}).limit(30);
+  const { data: expenses } = await sb.from('trip_expenses').select('amount').eq('company_id', companyId);
+
+  const allSales = [...(bookings||[]), ...(specials||[])];
+  const ingresos = allSales.filter(x=>x.payment_status==='paid').reduce((a,b)=>a+Number(b.price||0),0);
+  const gastosTotal = (expenses||[]).reduce((a,e)=>a+Number(e.amount||0),0);
+
+  let html = `
+    <div class="toolbar"><button class="btn btn-outline btn-sm" onclick="copiarRutasAEmpresa('${companyId}', '${(settings?.business_name||'esta empresa').replace(/'/g,"\\'")}')">Copiar mis rutas y horarios a esta empresa</button></div>
+    <div class="grid grid-4 kpiRow" style="margin-bottom:18px">
+      <div class="card statCard"><div class="label">Negocio</div><div class="value" style="font-size:16px">${settings?.business_name || '—'}</div></div>
+      <div class="card statCard"><div class="label">Ventas totales</div><div class="value">${allSales.length}</div></div>
+      <div class="card statCard"><div class="label">Ingresos totales</div><div class="value brand">${money(ingresos)}</div></div>
+      <div class="card statCard"><div class="label">Gastos operativos</div><div class="value" style="color:#fca5a5">${money(gastosTotal)}</div></div>
+    </div>
+    <div class="sectionCard">
+      <h3>Usuarios de la empresa <button class="btn btn-primary btn-sm" onclick="openUserModal('${companyId}')">+ Nuevo usuario</button></h3>
+      <div class="tableWrap"><table><thead><tr><th>Nombre</th><th>Rol</th><th>Estado</th></tr></thead><tbody>
+        ${(users||[]).map(u=>`<tr><td>${u.full_name}</td><td><span class="roleTag ${u.role}">${u.role}</span></td><td>${u.active?'<span class="badge paid">Activo</span>':'<span class="badge cancelled">Inactivo</span>'}</td></tr>`).join('') || '<tr><td colspan="3" class="tag">Sin usuarios</td></tr>'}
+      </tbody></table></div>
+    </div>
+    <div class="sectionCard">
+      <h3>Ventas recientes</h3>
+      <div class="tableWrap"><table><thead><tr><th>Folio</th><th>Ruta</th><th>Fecha</th><th>Precio</th><th>Estado</th></tr></thead><tbody>
+        ${(bookings||[]).map(b=>`<tr><td>${b.folio}</td><td>${b.trip_instances?(b.trip_instances.routes.origin+' → '+b.trip_instances.routes.destination):'—'}</td><td>${fmtDate(b.trip_instances?.trip_date)}</td><td>${money(b.price)}</td><td><span class="badge ${b.payment_status}">${b.payment_status}</span></td></tr>`).join('')}
+        ${(specials||[]).map(s=>`<tr><td>${s.folio}</td><td>${s.origin} → ${s.destination} (especial)</td><td>${fmtDate(s.trip_date)}</td><td>${money(s.price)}</td><td><span class="badge ${s.payment_status}">${s.payment_status}</span></td></tr>`).join('')}
+        ${(!bookings || !bookings.length) && (!specials || !specials.length) ? '<tr><td colspan="5" class="tag">Sin ventas registradas</td></tr>' : ''}
+      </tbody></table></div>
+    </div>
+    <div class="sectionCard">
+      <h3>Historial de check-ins</h3>
+      <div class="tableWrap"><table><thead><tr><th>Chofer</th><th>Ruta</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>
+        ${(checkins||[]).map(c=>`<tr><td>${c.profiles.full_name}</td><td>${c.trip_instances.routes.origin} → ${c.trip_instances.routes.destination}</td><td>${fmtDate(c.trip_instances.trip_date)}</td><td><span class="badge ${c.status==='checked_out'?'paid':(c.status==='rejected'?'cancelled':'pending')}">${c.status}</span></td></tr>`).join('') || '<tr><td colspan="4" class="tag">Sin check-ins registrados</td></tr>'}
+      </tbody></table></div>
+    </div>`;
+  content.innerHTML = html;
+}
+
+// ===================== INIT =====================
+(async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){ await afterLogin(); }
+  document.getElementById('loginPassword').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+})();
+
+</script>
+</body>
+</html>
