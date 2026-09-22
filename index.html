@@ -1738,12 +1738,21 @@ async function loadCheckin(){
     box.innerHTML = `<h3>Sin turno activo</h3><p class="tag">Selecciona una salida de la lista para solicitar tu check-in.</p>`;
   }
 
-  const today = todayStr();
-  const { data: trips, error } = await sb.from('trip_instances')
-    .select('*, routes(origin,destination)')
-    .eq('company_id', currentProfile.company_id)
-    .eq('trip_date', today)
-    .order('departure_time');
+  // 👇 Muestra salidas de HOY (con margen de 1 día) + los próximos 7 días
+const ahora = new Date();
+const desde = new Date(ahora); desde.setDate(desde.getDate() - 1);   // ayer
+const hasta = new Date(ahora); hasta.setDate(hasta.getDate() + 7);   // +7 días
+const desdeStr = desde.toISOString().slice(0,10);
+const hastaStr = hasta.toISOString().slice(0,10);
+const hoyStr = ahora.toISOString().slice(0,10);
+
+const { data: trips, error } = await sb.from('trip_instances')
+  .select('*, routes(origin,destination)')
+  .eq('company_id', currentProfile.company_id)
+  .gte('trip_date', desdeStr)
+  .lte('trip_date', hastaStr)
+  .order('trip_date')
+  .order('departure_time');
 
   if(error){
     console.error('Error cargando salidas del chofer:', error);
@@ -1751,16 +1760,24 @@ async function loadCheckin(){
       `<tr><td colspan="4" class="tag" style="color:#fca5a5">Error: ${error.message}</td></tr>`;
     return;
   }
+
   const tbody = document.querySelector('#tblSalidasChofer tbody');
   tbody.innerHTML = '';
+
   if(!trips || !trips.length){
-    tbody.innerHTML = '<tr><td colspan="4" class="tag">No hay salidas generadas para hoy en tu empresa. Pide al administrador que las genere desde "Rutas y precios".</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="tag">No hay salidas en los próximos días. Pide al administrador que las genere desde "Rutas y precios".</td></tr>';
     return;
   }
+
   trips.forEach(t=>{
     const tr = document.createElement('tr');
+    const esHoy = t.trip_date === hoyStr;
     const disabled = active ? 'disabled' : '';
-    tr.innerHTML = `<td>${t.routes.origin} → ${t.routes.destination}</td>
+    const badgeDia = esHoy
+      ? '<span class="badge paid" style="margin-left:6px">Hoy</span>'
+      : `<span class="badge pending" style="margin-left:6px">${fmtDate(t.trip_date)}</span>`;
+    tr.innerHTML = `
+      <td>${t.routes.origin} → ${t.routes.destination} ${badgeDia}</td>
       <td>${fmtTime(t.departure_time)}</td>
       <td>${t.seats_booked}/${t.total_seats}</td>
       <td><button class="btn btn-primary btn-sm" ${disabled} onclick="hacerCheckin('${t.id}')">Solicitar salida</button></td>`;
